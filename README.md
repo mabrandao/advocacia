@@ -1,8 +1,8 @@
 # Sistema de Advocacia
 
-Sistema web desenvolvido para escritórios de advocacia, oferecendo uma plataforma completa para gestão de clientes, processos e documentos jurídicos.
+Sistema em desenvolvimento para web, desenvolvido para escritórios de advocacia, oferecendo uma plataforma completa para gestão de clientes, processos e documentos jurídicos.
 
-## 🚀 Funcionalidades
+## 🚀 Funcionalidades 
 
 - 🏢 Site institucional moderno e responsivo
 - 👥 Área do cliente para acompanhamento de processos
@@ -67,7 +67,6 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 ## ✨ Autor
 
-Desenvolvido por [Seu Nome/Empresa]
+Desenvolvido por Marcos Brandão
 
----
-⌨️ com ❤️ por [Seu Nome/Empresa]
+

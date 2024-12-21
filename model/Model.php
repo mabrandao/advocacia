@@ -14,6 +14,8 @@ require_once 'core/config/database.php';
  * @version 1.0
  */
 class Model {
+    protected $table;
+    protected $dados;
     
     /**
      * Sanitiza dados de entrada para prevenir SQL Injection e XSS
@@ -21,7 +23,7 @@ class Model {
      * @param mixed $data Dados a serem sanitizados (string ou array)
      * @return mixed Dados sanitizados
      */
-    private function sanitizeData($data) {
+    protected function sanitizeData($data) {
         if (is_array($data)) {
             foreach ($data as $key => $value) {
                 // Remove caracteres especiais das chaves
@@ -51,7 +53,7 @@ class Model {
      * @param mixed $value Valor a ser sanitizado
      * @return mixed Valor sanitizado
      */
-    private function sanitizeValue($value) {
+    protected function sanitizeValue($value) {
         if ($value === null) {
             return null;
         }
@@ -75,9 +77,7 @@ class Model {
      * @param array $data Array associativo com os dados a serem inseridos
      * @return bool True em caso de sucesso, False em caso de erro
      */
-    public function create($tabela, $data) {
-        // Sanitiza a tabela
-        $tabela = preg_replace('/[^a-zA-Z0-9_]/', '', $tabela);
+    public function create($data) {
         
         // Sanitiza os dados
         $data = $this->sanitizeData($data);
@@ -87,7 +87,7 @@ class Model {
         $valores = array_values($data);
         $placeholders = array_fill(0, count($campos), '?');
         
-        $sql = "INSERT INTO {$tabela} (" . implode(', ', $campos) . ") 
+        $sql = "INSERT INTO {$this->table} (" . implode(', ', $campos) . ") 
                 VALUES (" . implode(', ', $placeholders) . ")";
                 
         try {
@@ -112,10 +112,10 @@ class Model {
      * @param string $order Ordenação (opcional)
      * @return array Registros encontrados
      */
-    public function findAll($tabela, $data = "*", $where = "", $order = "") {
+    public function findAll($data = "*", $where = "", $order = "") {
         try {
             $conn = Database::getInstance();
-            $sql = "SELECT $data FROM $tabela";
+            $sql = "SELECT $data FROM {$this->table}";
             
             if (!empty($where)) {
                 $sql .= " WHERE $where";
@@ -145,10 +145,10 @@ class Model {
      * @param string $data Campos a serem retornados (padrão: "*")
      * @return array|false Registro encontrado ou false
      */
-    public function find($tabela, $id, $data = "*") {
+    public function find($id, $data = "*") {
         try {
             $conn = Database::getInstance();
-            $sql = "SELECT $data FROM $tabela WHERE id = :id";
+            $sql = "SELECT $data FROM {$this->table} WHERE id = :id";
             $stmt = $conn->prepare($sql);
             $stmt->bindParam(':id', $id);
             $stmt->execute();
@@ -170,11 +170,8 @@ class Model {
      * @param int $id ID do registro
      * @return bool True em caso de sucesso, False em caso de erro
      */
-    public function update($tabela, $data, $id) {
-        // Sanitiza a tabela
-        $tabela = preg_replace('/[^a-zA-Z0-9_]/', '', $tabela);
+    public function update($data, $id) {
         
-        // Sanitiza os dados
         $data = $this->sanitizeData($data);
         
         // Prepara os campos para o UPDATE
@@ -188,7 +185,7 @@ class Model {
         // Adiciona o ID no final do array de valores
         $valores[] = $id;
         
-        $sql = "UPDATE {$tabela} SET " . implode(', ', $sets) . " 
+        $sql = "UPDATE {$this->table} SET " . implode(', ', $sets) . " 
                 WHERE id = ? LIMIT 1";
                 
         try {
@@ -211,10 +208,10 @@ class Model {
      * @param string $tabela Nome da tabela
      * @return bool True em caso de sucesso, False em caso de erro
      */
-    public function delete($id, $tabela) {
+    public function delete($id) {
         try {
             $conn = Database::getInstance();
-            $sql = "UPDATE $tabela SET deleted_at = NOW() WHERE id = :id LIMIT 1";
+            $sql = "UPDATE {$this->table} SET deleted_at = NOW() WHERE id = :id LIMIT 1";
             $stmt = $conn->prepare($sql);
             $stmt->bindParam(':id', $id);
             $result = $stmt->execute();
@@ -222,7 +219,7 @@ class Model {
             return $result;
         } catch(PDOException $e) {
             error_log("Erro na exclusão: " . $e->getMessage());
-            Database::close();
+            Database::close();  
             return false;
         }
     }
@@ -364,5 +361,91 @@ class Model {
      */
     private function validateMatches($value, $field) {
         return $value === $this->data[$field];
+    }
+
+    public function getDataTableData($params, $searchableColumns = [], $orderableColumns = []) {
+        try {
+            $conn = Database::getInstance();
+            
+            // Parâmetros do DataTables
+            $draw = $params['draw'];
+            $start = $params['start'];
+            $length = $params['length'];
+            $search = $params['search']['value'];
+            $orderColumn = isset($params['order'][0]['column']) ? $params['order'][0]['column'] : null;
+            $orderDir = isset($params['order'][0]['dir']) ? $params['order'][0]['dir'] : 'ASC';
+            
+            // Se não houver colunas de busca definidas, usar todas as colunas ordenáveis
+            if (empty($searchableColumns)) {
+                $searchableColumns = $orderableColumns;
+            }
+            
+            // Construção da query base
+            $baseQuery = "FROM {$this->table}";
+            $whereClause = "";
+            
+            // Adiciona busca se houver
+            if (!empty($search) && !empty($searchableColumns)) {
+                $searchConditions = [];
+                foreach ($searchableColumns as $column) {
+                    $searchConditions[] = "$column LIKE :search";
+                }
+                $whereClause = " WHERE (" . implode(" OR ", $searchConditions) . ")";
+            }
+            
+            // Query para contar total de registros
+            $totalQuery = "SELECT COUNT(*) as total " . $baseQuery;
+            $stmt = $conn->query($totalQuery);
+            $recordsTotal = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+            
+            // Query para contar registros filtrados
+            $filteredQuery = "SELECT COUNT(*) as total " . $baseQuery . $whereClause;
+            $stmt = $conn->prepare($filteredQuery);
+            if (!empty($search) && !empty($searchableColumns)) {
+                $stmt->bindValue(':search', "%$search%", PDO::PARAM_STR);
+            }
+            $stmt->execute();
+            $recordsFiltered = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+            
+            // Definir ordenação
+            $orderByClause = "";
+            if ($orderColumn !== null && isset($orderableColumns[$orderColumn])) {
+                $orderByClause = " ORDER BY " . $orderableColumns[$orderColumn] . " " . $orderDir;
+            }
+            
+            // Query principal
+            $mainQuery = "SELECT * " . $baseQuery . $whereClause . $orderByClause . " LIMIT :start, :length";
+            
+            $stmt = $conn->prepare($mainQuery);
+            if (!empty($search) && !empty($searchableColumns)) {
+                $stmt->bindValue(':search', "%$search%", PDO::PARAM_STR);
+            }
+            $stmt->bindValue(':start', (int)$start, PDO::PARAM_INT);
+            $stmt->bindValue(':length', (int)$length, PDO::PARAM_INT);
+            $stmt->execute();
+            $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Formatação da resposta no padrão do DataTables
+            $response = [
+                'draw' => (int)$draw,
+                'recordsTotal' => (int)$recordsTotal,
+                'recordsFiltered' => (int)$recordsFiltered,
+                'data' => $data
+            ];
+            
+            Database::close();
+            return json_encode($response);
+            
+        } catch(PDOException $e) {
+            error_log("Erro no DataTables: " . $e->getMessage());
+            Database::close();
+            return json_encode([
+                'error' => $e->getMessage(),
+                'draw' => (int)$params['draw'],
+                'recordsTotal' => 0,
+                'recordsFiltered' => 0,
+                'data' => []
+            ]);
+        }
     }
 }

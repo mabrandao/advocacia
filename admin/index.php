@@ -1,65 +1,44 @@
 <?php
 define('TIPO', 'admin');
 
-require_once '../core/filter/auth.php';
+//require_once ('../core/filter/filter.php');
 
-$sessao = new Session();
-// Obtém a URL atual
 $url = isset($_GET['url']) ? $_GET['url'] : 'dashboard';
 $url = rtrim($url, '/');
 $url = filter_var($url, FILTER_SANITIZE_URL);
 $url = explode('/', $url);
 
-// Define a página atual
 $pagina = $url[0];
 
 $rotas = [
-    'dashboard',
-    'perfil',
-    'clientes',
-    'servicos',
-    'configuracoes',
-    'logout',
-    'processos',
-    'noticias',
-    'sobre',
-    'areas-atuacao',
-    'contato',
-    '404'
+    'dashboard' => ['DashboardController', 'index', 'Dashboard'],
+    'perfil' => ['PerfilController', 'index', 'Perfil'],
+    'clientes' => ['ClientesController', 'index', 'Clientes'],
+    'servicos' => ['ServicosController', 'index', 'Servicos'],
+    'configuracoes' => ['ConfiguracoesController', 'index', 'Configuracoes'],
+    'logout' => ['LogoutController', 'index'],
+    'processos' => ['ProcessosController', 'index', 'Processos'],
+    'noticias' => ['NoticiasController', 'index', 'Noticias'],
+    'sobre' => ['SobreController', 'index', 'Sobre'],
+    'areas-atuacao' => ['AreasAtuacaoController', 'index', 'Áreas de Atuação'],
+    'contato' => ['ContatoController', 'index', 'Contato'],
+    '404' => ['ErrorController', 'index', 'Página Não Encontrada']
 ];
 
-$titulos = [
-    'dashboard' => 'Dashboard',
-    'perfil' => 'Meus Dados de Usuário',
-    'clientes' => 'Meus Clientes',
-    'servicos' => 'Meus Servicos',
-    'configuracoes' => 'Minhas Configurações',
-    'logout' => 'Logout',
-    'processos' => 'Meus Processos',
-    'noticias' => 'Notícias e Anúncios',
-    'sobre' => 'Sobre',
-    'areas-atuacao' => 'Áreas de Atuação',
-    'contato' => 'Contato',
-    '404' => 'Página Não Encontrada'
-];
+$rota = isset($rotas[$pagina]) ? $rotas[$pagina] : $rotas['404'];
 
-$arquivo = 'site/pages/'.$pagina.'.php';  
+$arquivo = 'controller/'.$rota[0].'.php';  
 
-require_once 'site/assets/header.php';
+if (!file_exists($arquivo)) {   
+    echo $error = "Controller: <strong>$arquivo</strong> não encontrado!";
+    include_once 'controller/ErrorController.php';
+    return;
+} 
 
-if (!file_exists($arquivo)) {    
-    require_once 'site/pages/404.php';
-    require_once 'site/assets/footer.php';
-    exit;
-}
+require_once $arquivo;
+$controller_class = $rota[0];
+$metodo = $rota[1];
+$titulo = $rota[2];
 
-// Verifica se a página solicitada existe nas rotas
-if (in_array($pagina, $rotas)) {    
-    require_once $arquivo;
-} else {
-    $redirect->redirectMessage(1, 'Página não encontrada', '404', 'error');
-}
-
-require_once 'site/assets/footer.php';
-
-echo $redirect->depurarSession();
+$controller = new $controller_class();
+$controller->$metodo();

@@ -16,7 +16,8 @@ $rotas = [
     'sobre',
     'areas-atuacao',
     'contato',
-    'blog'
+    'blog',
+    'login'
 ];
 
 $titulos = [

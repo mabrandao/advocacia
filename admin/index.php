@@ -18,8 +18,13 @@ $rotas = [
     'configuracoes' => ['ConfiguracoesController', 'index', 'Configuracoes'],
     'logout' => ['LogoutController', 'index'],
     'processos' => ['ProcessosController', 'index', 'Processos'],
+
     'noticias' => ['NoticiasController', 'index', 'Noticias'],
     'noticias-listar' => ['NoticiasController', 'listar', ''],
+    'noticias-store' => ['NoticiasController', 'store', 'Cadastrar Noticia'],
+    'noticias-edit' => ['NoticiasController', 'edit', 'Editar Noticia'],
+    'noticias-delete' => ['NoticiasController', 'delete', ''],
+    
     'sobre' => ['SobreController', 'index', 'Sobre'],
     'areas-atuacao' => ['AreasAtuacaoController', 'index', 'Áreas de Atuação'],
     'contato' => ['ContatoController', 'index', 'Contato'],

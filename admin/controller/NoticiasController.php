@@ -12,35 +12,62 @@ class NoticiasController extends ControllerAdmin {
         $this->model = new NoticiasModel();
     }
     public function index() {     
-        $dados['title'] = 'Notícias';  
+        $dados['title'] = 'Administrar';  
         $dados['filds'] = $this->model->fields_data();
         return $this->loadPage('noticias', $dados);
 
     }
 
-    public function listar() {    
-
+    public function listar() {
         // Retorna o JSON diretamente
         echo $this->model->getDataTable($this->getPost());
     }
 
+
     public function store() {   
 
-        if (empty($this->getPost())) {            
-            return $this->redirects->redirectMessage('back', 'Sem dados!', 'noticias', 'error');
+        if (empty($this->getPost())) {    
+            $dados['title'] = 'Cadastrar';
+            $dados['filds'] = $this->model->fields(); 
+            $dados['tipo'] = "store";       
+            return $this->loadPage('noticias-edit', $dados);
         }
 
         if ($this->model->create($this->getPost())) {
             return $this->redirects->redirectMessage(1, 'Noticia cadastrada com sucesso!', 'admin/noticias', 'success');
-        } else {
-            return $this->redirects->redirectMessage('back', $this->model->get_erro(), '', 'error');
-        }
+        } 
+
+        return $this->redirects->redirectMessage('back', $this->model->get_erro(), '', 'error');
         
-        return $this->loadPage('noticias', ['campos' => $this->getPost(), 'error' => $this->model->get_erro()]);
-       
     }
 
     public function edit() {     
+
+        if (empty($this->getGET()['id']) & empty($this->getPost())) {
+            return $this->redirects->redirectMessage('back', 'Sem ID da noticia para editar!', '', 'error');
+        }
+
+        if (isset($this->getPost()['id'])) {
+            if ($this->model->update($this->getPost())) {
+                return $this->redirects->redirectMessage(1, 'Noticia atualizada com sucesso!', 'admin/noticias', 'success');
+            } else {
+                return $this->redirects->redirectMessage('back', $this->model->get_erro(), '', 'error');
+            }
+        }
+
+        if ($this->model->find($this->getGET()['id'])) {
+            $dados['title'] = 'Editar';
+            $dados['filds'] = $this->model->fields_data();
+            $dados['noticia'] = $this->model->find($this->getGET()['id']);
+            $dados['tipo'] = "edit";
+            return $this->loadPage('noticias-edit', $dados);
+        } else {
+            return $this->redirects->redirectMessage('back', 'Noticia nao encontrada!', '', 'error');
+        }
+
+    }
+
+    public function delete() {
 
         if (empty($this->getPost())) {            
             return $this->redirects->redirectMessage('back', 'Sem dados!', '', 'error');
@@ -50,12 +77,10 @@ class NoticiasController extends ControllerAdmin {
             return $this->redirects->redirectMessage('back', 'Sem ID da noticia!', '', 'error');
         }
 
-        if ($this->model->update($this->getPost())) {
-            return $this->redirects->redirectMessage(1, 'Noticia atualizada com sucesso!', 'admin/noticias', 'success');
+        if ($this->model->delete($this->getPost()['id'])) {
+            return $this->redirects->redirectMessage(1, 'Noticia excluida com sucesso!', 'admin/noticias', 'success');
         } else {
             return $this->redirects->redirectMessage('back', $this->model->get_erro(), '', 'error');
         }
     }
-
-   
 }

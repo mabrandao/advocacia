@@ -75,6 +75,28 @@ public function getPost($allowedTags = []) {
 }
 
 /**
+ * Retorna os dados do GET sanitizados no formato array associativo
+ * @return array|null
+ */
+
+public function getGET() {
+    // Verifica se houve GET se não houver, retorna null
+    if (empty($_GET)) {
+        return null;
+    }
+    $get = [];
+    foreach ($_GET as $key => $value) {
+        // Pula campos do sistema
+        if (in_array($key, ['csrf_token', 'action'])) {
+            continue;
+        }
+
+        $get[$key] = $this->sanitizeValue($value);
+    }
+    return $get;
+}
+
+/**
  * Sanitiza um valor individual
  * @param mixed $value Valor a ser sanitizado
  * @param array $allowedTags Tags HTML permitidas para este campo

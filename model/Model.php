@@ -320,32 +320,40 @@ abstract class Model {
      * @param string $baseUrl URL base para as ações
      * @return string HTML dos botões
      */
-    protected function generateActionButtons($id, $baseUrl) {
-        $buttons = '<div class="btn-group">';
+    protected function generateActionButtons($id, $baseUrl, $exibir) {
+
+        $buttons = '<div class="btn-group">';        
+        if (in_array('editar', $exibir)) {
+            $buttons .= '<a href="' . base_url() . $baseUrl . '-editar/' . $id . '" ';
+            $buttons .= 'class="btn btn-sm btn-info" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Editar" title="Editar">';
+            $buttons .= '<i class="bi bi-pencil"></i></a>';
+        }
         
-        // Botão Editar
-        $buttons .= '<a href="' . base_url() . $baseUrl . '-editar/' . $id . '" ';
-        $buttons .= 'class="btn btn-sm btn-info" title="Editar">';
-        $buttons .= '<i class="bi bi-pencil"></i> Editar</a>';
-        
-        // Botão Excluir
-        $buttons .= '<a href="' . base_url() . $baseUrl . '-excluir/' . $id . '" ';
-        $buttons .= 'class="btn btn-sm btn-danger" title="Excluir" ';
-        $buttons .= 'onclick="return confirm(\'Tem certeza que deseja excluir este registro?\');">';
-        $buttons .= '<i class="bi bi-trash"></i> Excluir</a>';
-        
+        if (in_array('excluir', $exibir)) {
+            $buttons .= '<a href="' . base_url() . $baseUrl . '-excluir/' . $id . '" ';
+            $buttons .= 'class="btn btn-sm btn-danger" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Excluir" title="Excluir" ';
+            $buttons .= 'onclick="return confirm(\'Tem certeza que deseja excluir este registro?\');">';
+            $buttons .= '<i class="bi bi-trash"></i></a>';
+        }
+
+        if (in_array('visualizar', $exibir)) {
+            $buttons .= '<a href="' . base_url() . $baseUrl . '-visualizar/' . $id . '" ';
+            $buttons .= 'class="btn btn-sm btn-primary" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Visualizar" title="Visualizar">';
+            $buttons .= '<i class="bi bi-eye"></i></a>';
+        }        
         $buttons .= '</div>';
         
         return $buttons;
     }
-
+        
     /**
      * Método genérico para DataTables com suporte a busca, ordenação e paginação
      * 
      * @param array $params Parâmetros do DataTables
      * @return string JSON formatado para DataTables
+     * 
      */
-    public function getDataTable($params) {
+    public function getDataTable($params, $exibir = ['editar', 'excluir', 'visualizar']) {
         try {
             $conn = Database::getInstance();
             
@@ -430,7 +438,7 @@ abstract class Model {
             
             // Adiciona os botões de ação
             foreach ($data as &$row) {
-                $row['acoes'] = $this->generateActionButtons($row['id'], $this->table);
+                $row['acoes'] = $this->generateActionButtons($row['id'], $this->table, $exibir);
                 if (isset($row['creat_at'])) {
                     $row['creat_at'] = date('d/m/Y - H:i', strtotime($row['creat_at']))."Hrs";
                 }

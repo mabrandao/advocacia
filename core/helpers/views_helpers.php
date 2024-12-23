@@ -25,7 +25,7 @@ class ViewsHelpers
                 'url' => base_url() . 'assets/vendor/datatables/pt-BR.json'
             ],
             'pageLength' => 25,
-            'dom' => "<'row text-center mb-3'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" .
+            'dom' => "<'row text-center mb-3'<'col-sm-12 col-md-6 text-center'l><'col-sm-12 col-md-6 text-end'f>>" .
                     "<'row'<'col-sm-12'tr>>" .
                     "<'row mt-3'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7 d-flex justify-content-end'p>>" .
                     "<'row text-center mt-3'<'col-12'B>>",
@@ -123,18 +123,141 @@ class ViewsHelpers
         ];
     }
 
+    public static function creatForm($param)
+    {
+        // Verifica se os parâmetros necessários foram passados
+        if (!isset($param['action']) || !isset($param['fields'])) {
+            return 'Parâmetros action e fields são obrigatórios';
+        }
+
+        $form = '<form action="'.base_url().$param['action'].'" method="POST" enctype="multipart/form-data">';
+        
+        if (isset($param['hidden'])) {
+            foreach ($param['hidden'] as $name => $value) {
+                $form .= '<input type="hidden" name="'.$name.'" value="'.$value.'">';
+            }
+        }
+
+        $form .= '<div class="row">';
+        foreach ($param['fields'] as $field) {
+            // Verifica se os campos obrigatórios existem
+            if (!isset($field['name']) || !isset($field['type']) || !isset($field['label'])) {
+                continue;
+            }
+
+            $class = isset($field['class']) ? $field['class'] : '';
+            $value = isset($field['value']) ? $field['value'] : '';
+            $required = isset($field['required']) && $field['required'] ? 'required' : '';
+            $placeholder = isset($field['placeholder']) ? 'placeholder="'.$field['placeholder'].'"' : '';
+            $col = isset($field['col']) ? $field['col'] : 'col-md-6';
+
+            $form .= '<div class="'.$col.'">';
+            $form .= '<div class="form-group mb-3">';
+            $form .= '<label for="'.$field['name'].'" class="form-label">'.$field['label'].'</label>';
+
+            switch ($field['type']) {
+                case 'textarea':
+                    $form .= '<textarea class="form-control '.$class.'" id="'.$field['name'].'" 
+                        name="'.$field['name'].'" '.$required.' '.$placeholder.'>'.$value.'</textarea>';
+                    break;
+
+                case 'select':
+                    $form .= '<select class="form-control '.$class.'" id="'.$field['name'].'" 
+                        name="'.$field['name'].'" '.$required.'>';
+                    if (isset($field['options'])) {
+                        foreach ($field['options'] as $key => $option) {
+                            $selected = ($value == $key) ? 'selected' : '';
+                            $form .= '<option value="'.$key.'" '.$selected.'>'.$option.'</option>';
+                        }
+                    }
+                    $form .= '</select>';
+                    break;
+
+                case 'radio':
+                case 'checkbox':
+                    if (isset($field['options'])) {
+                        foreach ($field['options'] as $key => $option) {
+                            $checked = ($value == $key) ? 'checked' : '';
+                            $form .= '<div class="form-check">';
+                            $form .= '<input class="form-check-input '.$class.'" type="'.$field['type'].'" 
+                                id="'.$field['name'].'_'.$key.'" name="'.$field['name'].'" value="'.$key.'" '.$checked.' '.$required.'>';
+                            $form .= '<label class="form-check-label" for="'.$field['name'].'_'.$key.'">'.$option.'</label>';
+                            $form .= '</div>';
+                        }
+                    }
+                    break;
+
+                default:
+                    $form .= '<input type="'.$field['type'].'" class="form-control '.$class.'" 
+                        id="'.$field['name'].'" name="'.$field['name'].'" value="'.$value.'" 
+                        '.$required.' '.$placeholder.'>';
+            }
+
+            $form .= '</div></div>';
+        }
+        $form .= '</div>';
+
+        // Extrai o nome base da URL removendo sufixos
+        $back = preg_replace('/-(?:editar|cadastrar|store|edit)$/', '', $param['action']);
+
+        // Botões do formulário
+        $form .= '<div class="row mt-3">';
+        $form .= '<div class="col-12">';
+        if (isset($param['buttons'])) {
+            foreach ($param['buttons'] as $button) {
+                $type = isset($button['type']) ? $button['type'] : 'submit';
+                $class = isset($button['class']) ? $button['class'] : 'btn-primary';
+                $text = isset($button['text']) ? $button['text'] : 'Enviar';
+                $form .= '<button type="'.$type.'" class="btn '.$class.' me-2">'.$text.'</button>';
+            }
+        } else {
+            $form .= '<button type="submit" class="btn btn-primary me-2">Salvar</button>';
+            $form .= '<a href="'.base_url().'admin/'.$back.'" class="btn btn-secondary">Voltar</a>';
+        }
+        $form .= '</div></div>';
+
+        $form .= '</form>';
+        return $form;
+    }
+
     /**
-     * Exemplo de uso:
+     * exemplo de uso da função creatForm:
      * 
-     * $campos = [
-     *     'id',
-     *     'nome',
-     *     'botoes'
-     * ];
+     * $param = [
+     *      'action' => 'admin/categorias/editar',
+     *      'fields' => [
+     *          [
+     *              'name' => 'nome',
+     *              'type' => 'text',
+     *              'label' => 'Nome',
+     *              'class' => 'form-control',
+     *              'value' => $categoria->nome,
+     *              'required' => true
+     *          ],
+     *          [
+     *              'name' => 'descricao',
+     *              'type' => 'textarea',
+     *              'label' => 'Descrição',
+     *              'class' => 'form-control',
+     *              'value' => $categoria->descricao,
+     *              'required' => true
+     *          ]
+     *      ],
+     *      'buttons' => [
+     *          [
+     *              'type' => 'submit',
+     *              'class' => 'btn-primary',
+     *              'text' => 'Salvar'
+     *          ],
+     *          [
+     *              'type' => 'button',
+     *              'class' => 'btn-secondary',
+     *              'text' => 'Voltar'
+     *          ]
+     *      ]
+     *  ];
      * 
-     * $datatable = $viewHelper->ajaxDataTables('/api/dados', $campos);
-     * echo $datatable['table'];
-     * echo $datatable['script'];
+     * echo $this->creatForm($param);
      */
 
     public function ConvertDate($data){

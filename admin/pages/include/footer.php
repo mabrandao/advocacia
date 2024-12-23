@@ -30,6 +30,7 @@
 
   <!-- Vendor JS Files -->
   <script src="<?= base_url() ?>assets/vendor/apexcharts/apexcharts.min.js"></script>
+  <script src="<?= base_url() ?>assets/vendor/bootstrap/js/popper.min.js"></script>
   <script src="<?= base_url() ?>assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script src="<?= base_url() ?>assets/vendor/chart.js/chart.umd.js"></script>
   <script src="<?= base_url() ?>assets/vendor/echarts/echarts.min.js"></script>
@@ -42,6 +43,34 @@
 
   <!-- Template Main JS File -->
   <script src="<?= base_url() ?>assets/js/main.js"></script>
+
+  <script>
+    // Função para inicializar tooltips
+    function initTooltips() {
+      var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+      tooltipTriggerList.forEach(function(tooltipTriggerEl) {
+        var tooltip = bootstrap.Tooltip.getInstance(tooltipTriggerEl);
+        if (tooltip) {
+          tooltip.dispose();
+        }
+        new bootstrap.Tooltip(tooltipTriggerEl, {
+          trigger: 'hover'
+        });
+      });
+    }
+
+    // Inicializa tooltips quando o DOM estiver pronto
+    document.addEventListener('DOMContentLoaded', function() {
+      initTooltips();
+    });
+
+    // Reinicializa tooltips após cada draw do DataTables
+    $(document).on('draw.dt', function() {
+      setTimeout(function() {
+        initTooltips();
+      }, 100);
+    });
+  </script>
 
 </body>       
 

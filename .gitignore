@@ -2,8 +2,12 @@
 .DS_Store
 Thumbs.db
 
-# Dependências
-/vendor/
+# Dependências do Composer
+/vendor/*
+!/vendor/.gitkeep
+!/assets/vendor/
+
+# Node modules
 /node_modules/
 
 # Arquivos de ambiente

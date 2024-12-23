@@ -19,7 +19,3 @@ Thumbs.db
 .vscode/
 *.sublime-project
 *.sublime-workspace
-
-# Inclui assets/
-!/assets/
-!/assets/**

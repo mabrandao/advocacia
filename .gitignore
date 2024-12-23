@@ -5,7 +5,6 @@ Thumbs.db
 # Dependências do Composer
 /vendor/*
 !/vendor/.gitkeep
-!/assets/vendor/
 
 # Node modules
 /node_modules/
@@ -24,3 +23,8 @@ Thumbs.db
 .vscode/
 *.sublime-project
 *.sublime-workspace
+
+# Inclui assets/vendor
+!/assets/
+!/assets/vendor/
+!/assets/vendor/**

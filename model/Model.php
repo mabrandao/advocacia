@@ -1,6 +1,7 @@
 <?php
 
-require_once 'core/config/database.php';
+require_once __DIR__ . '/../core/config/database.php';
+require_once __DIR__ . '/../core/config/session.php';
 
 /**
  * Classe Model - Classe base para operações no banco de dados
@@ -13,9 +14,20 @@ require_once 'core/config/database.php';
  * @since 1.0
  * @version 1.0
  */
-class Model {
+
+abstract class Model {
     protected $table;
     protected $dados;
+    protected $session;
+    protected $erro;
+
+    abstract protected function rules();
+    abstract protected function fields();
+    abstract protected function fields_data();
+
+    public function __construct() {
+        $this->session = new Session();
+    }
     
     /**
      * Sanitiza dados de entrada para prevenir SQL Injection e XSS
@@ -71,36 +83,100 @@ class Model {
     }
     
     /**
+     * Valida os dados de acordo com as regras definidas
+     * @param array $data Dados a serem validados
+     * @return array|bool Array com erros ou true se válido
+     */
+    protected function validate($data) {
+        $errors = [];
+        $rules = $this->rules();
+
+        foreach ($rules as $field => $fieldRules) {
+            foreach ($fieldRules as $rule) {
+                // Regra required
+                if ($rule === 'required' && (!isset($data[$field]) || empty($data[$field]))) {
+                    $errors[$field][] = "O campo {$field} é obrigatório";
+                    continue;
+                }
+
+                // Regra de tamanho máximo
+                if (strpos($rule, 'max:') === 0) {
+                    $max = (int) substr($rule, 4);
+                    if (isset($data[$field]) && strlen($data[$field]) > $max) {
+                        $errors[$field][] = "O campo {$field} deve ter no máximo {$max} caracteres";
+                    }
+                }
+
+                // Regra de tamanho mínimo
+                if (strpos($rule, 'min:') === 0) {
+                    $min = (int) substr($rule, 4);
+                    if (isset($data[$field]) && strlen($data[$field]) < $min) {
+                        $errors[$field][] = "O campo {$field} deve ter no mínimo {$min} caracteres";
+                    }
+                }
+
+                // Regra de email
+                if ($rule === 'email' && isset($data[$field]) && !filter_var($data[$field], FILTER_VALIDATE_EMAIL)) {
+                    $errors[$field][] = "O campo {$field} deve ser um email válido";
+                }
+
+                // Regra de número
+                if ($rule === 'numeric' && isset($data[$field]) && !is_numeric($data[$field])) {
+                    $errors[$field][] = "O campo {$field} deve ser um número";
+                }
+
+                // Regra de data
+                if ($rule === 'date' && isset($data[$field])) {
+                    $date = date_parse($data[$field]);
+                    if ($date['error_count'] > 0) {
+                        $errors[$field][] = "O campo {$field} deve ser uma data válida";
+                    }
+                }
+            }
+        }
+
+        if (!empty($errors)) {           
+            $this->erro = $errors;
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Insere dados em uma tabela
-     * 
-     * @param string $tabela Nome da tabela
      * @param array $data Array associativo com os dados a serem inseridos
-     * @return bool True em caso de sucesso, False em caso de erro
+     * @return bool True em caso de sucesso, false em caso de erro.
      */
     public function create($data) {
-        
+        // Valida os dados antes de inserir
+        if (!$this->validate($data)) {
+            return false;
+        }
+
         // Sanitiza os dados
         $data = $this->sanitizeData($data);
         
-        // Prepara os campos e valores para o INSERT
-        $campos = array_keys($data);
-        $valores = array_values($data);
-        $placeholders = array_fill(0, count($campos), '?');
-        
-        $sql = "INSERT INTO {$this->table} (" . implode(', ', $campos) . ") 
-                VALUES (" . implode(', ', $placeholders) . ")";
-                
         try {
             $conn = Database::getInstance();
+            
+            // Prepara os campos e valores para o SQL
+            $fields = array_keys($data);
+            $values = array_values($data);
+            $placeholders = array_fill(0, count($fields), '?');
+            
+            $sql = "INSERT INTO {$this->table} (" . implode(', ', $fields) . ") 
+                    VALUES (" . implode(', ', $placeholders) . ")";
+            
             $stmt = $conn->prepare($sql);
-            $result = $stmt->execute($valores);
-            Database::close();
-            return $result;
+            
+            return $stmt->execute($values);
         } catch(PDOException $e) {
             error_log("Erro na inserção: " . $e->getMessage());
-            Database::close();
+            $this->session->setFlash('error', 'Erro ao inserir registro: ' . $e->getMessage());
             return false;
         }
+        
     }
     
     /**
@@ -148,7 +224,7 @@ class Model {
     public function find($id, $data = "*") {
         try {
             $conn = Database::getInstance();
-            $sql = "SELECT $data FROM {$this->table} WHERE id = :id";
+            $sql = "SELECT $data FROM {$this->table} WHERE id = :id AND deleted_at IS NULL";
             $stmt = $conn->prepare($sql);
             $stmt->bindParam(':id', $id);
             $stmt->execute();
@@ -165,37 +241,47 @@ class Model {
     /**
      * Atualiza um registro
      * 
-     * @param string $tabela Nome da tabela
      * @param array $data Dados a serem atualizados
-     * @param int $id ID do registro
      * @return bool True em caso de sucesso, False em caso de erro
      */
-    public function update($data, $id) {
-        
+    public function update($data) {
+
+        // Valida os dados antes de atualizar
+        if (!$this->validate($data)) {
+            return false;
+        }
+
+        // Sanitiza os dados
         $data = $this->sanitizeData($data);
         
         // Prepara os campos para o UPDATE
         $sets = [];
         $valores = [];
+        $id = $data['id'];
+        unset($data['id']);
         foreach ($data as $campo => $valor) {
             $sets[] = "{$campo} = ?";
             $valores[] = $valor;
-        }
-        
-        // Adiciona o ID no final do array de valores
-        $valores[] = $id;
-        
+        }        
+
+        // Limpa os campos
+        $valores = array_map(function($value) {
+            return $value === null ? 'null' : $value;
+        }, $valores);
+
         $sql = "UPDATE {$this->table} SET " . implode(', ', $sets) . " 
-                WHERE id = ? LIMIT 1";
+                WHERE id = :id LIMIT 1";
                 
         try {
             $conn = Database::getInstance();
             $stmt = $conn->prepare($sql);
+            $stmt->bindParam(':id', $id);
             $result = $stmt->execute($valores);
             Database::close();
             return $result;
         } catch(PDOException $e) {
             error_log("Erro na atualização: " . $e->getMessage());
+            $this->session->setFlash('error', 'Erro na atualização: ' . $e->getMessage());
             Database::close();
             return false;
         }
@@ -219,233 +305,167 @@ class Model {
             return $result;
         } catch(PDOException $e) {
             error_log("Erro na exclusão: " . $e->getMessage());
+            $this->erro = "Erro na exclusão: " . $e->getMessage();
             Database::close();  
             return false;
         }
     }
+    
+
 
     /**
-     * Armazena os dados para validação
-     * @var array
-     */
-    private $data = [];
-
-    /**
-     * Armazena os erros de validação
-     * @var array
-     */
-    private $errors = [];
-    
-    /**
-     * Regras de validação disponíveis
-     * @var array
-     */
-    private $validationRules = [
-        'required' => [
-            'rule' => 'validateRequired',
-            'message' => 'O campo {field} é obrigatório'
-        ],
-        'email' => [
-            'rule' => 'validateEmail',
-            'message' => 'O campo {field} deve ser um e-mail válido'
-        ],
-        'min_length' => [
-            'rule' => 'validateMinLength',
-            'message' => 'O campo {field} deve ter no mínimo {param} caracteres'
-        ],
-        'max_length' => [
-            'rule' => 'validateMaxLength',
-            'message' => 'O campo {field} deve ter no máximo {param} caracteres'
-        ],
-        'matches' => [
-            'rule' => 'validateMatches',
-            'message' => 'O campo {field} deve ser igual ao campo {param}'
-        ]
-    ];
-    
-    /**
-     * Validação de dados
+     * Gera os botões de ação para o DataTables
      * 
-     * @param array $data Dados a serem validados
-     * @param array $rules Regras de validação
-     * @return bool True se válido, False se inválido
+     * @param int $id ID do registro
+     * @param string $baseUrl URL base para as ações
+     * @return string HTML dos botões
      */
-    public function validateData($data, $rules) {
-        $this->data = $data; // Store the data for validation
-        $this->errors = [];
+    protected function generateActionButtons($id, $baseUrl) {
+        $buttons = '<div class="btn-group">';
         
-        foreach ($rules as $field => $ruleSet) {
-            $value = isset($data[$field]) ? $data[$field] : null;
-            
-            // Se for string, converte para array
-            if (is_string($ruleSet)) {
-                $ruleSet = explode('|', $ruleSet);
-            }
-            
-            foreach ($ruleSet as $rule) {
-                $param = null;
-                
-                // Verifica se a regra tem parâmetro
-                if (is_string($rule) && strpos($rule, '[') !== false) {
-                    preg_match('/(.+?)\[(.*?)\]/', $rule, $matches);
-                    $rule = $matches[1];
-                    $param = $matches[2];
-                }
-                
-                // Se for array com mensagem personalizada
-                $message = null;
-                if (is_array($rule)) {
-                    $message = $rule[1];
-                    $rule = $rule[0];
-                }
-                
-                // Verifica se a regra existe
-                if (isset($this->validationRules[$rule])) {
-                    $method = $this->validationRules[$rule]['rule'];
-                    if (!$this->$method($value, $param)) {
-                        $defaultMessage = $this->validationRules[$rule]['message'];
-                        $errorMessage = $message ?? $defaultMessage;
-                        $errorMessage = str_replace('{field}', $field, $errorMessage);
-                        $errorMessage = str_replace('{param}', $param, $errorMessage);
-                        $this->errors[$field][] = $errorMessage;
-                    }
-                }
-            }
-        }
+        // Botão Editar
+        $buttons .= '<a href="' . base_url() . $baseUrl . '-editar/' . $id . '" ';
+        $buttons .= 'class="btn btn-sm btn-info" title="Editar">';
+        $buttons .= '<i class="bi bi-pencil"></i> Editar</a>';
         
-        return empty($this->errors);
-    }
-    
-    /**
-     * Retorna os erros de validação
-     * 
-     * @return array
-     */
-    public function getErrors() {
-        return $this->errors;
-    }
-    
-    /**
-     * Valida se o campo é obrigatório
-     */
-    private function validateRequired($value) {
-        if (is_array($value)) {
-            return !empty($value);
-        }
-        return trim($value) !== '';
-    }
-    
-    /**
-     * Valida se é um email válido
-     */
-    private function validateEmail($value) {
-        return filter_var($value, FILTER_VALIDATE_EMAIL) !== false;
-    }
-    
-    /**
-     * Valida o tamanho mínimo
-     */
-    private function validateMinLength($value, $min) {
-        return mb_strlen($value) >= $min;
-    }
-    
-    /**
-     * Valida o tamanho máximo
-     */
-    private function validateMaxLength($value, $max) {
-        return mb_strlen($value) <= $max;
-    }
-    
-    /**
-     * Valida se um campo é igual a outro
-     */
-    private function validateMatches($value, $field) {
-        return $value === $this->data[$field];
+        // Botão Excluir
+        $buttons .= '<a href="' . base_url() . $baseUrl . '-excluir/' . $id . '" ';
+        $buttons .= 'class="btn btn-sm btn-danger" title="Excluir" ';
+        $buttons .= 'onclick="return confirm(\'Tem certeza que deseja excluir este registro?\');">';
+        $buttons .= '<i class="bi bi-trash"></i> Excluir</a>';
+        
+        $buttons .= '</div>';
+        
+        return $buttons;
     }
 
-    public function getDataTableData($params, $searchableColumns = [], $orderableColumns = []) {
+    /**
+     * Método genérico para DataTables com suporte a busca, ordenação e paginação
+     * 
+     * @param array $params Parâmetros do DataTables
+     * @return string JSON formatado para DataTables
+     */
+    public function getDataTable($params) {
         try {
             $conn = Database::getInstance();
             
-            // Parâmetros do DataTables
-            $draw = $params['draw'];
-            $start = $params['start'];
-            $length = $params['length'];
-            $search = $params['search']['value'];
-            $orderColumn = isset($params['order'][0]['column']) ? $params['order'][0]['column'] : null;
-            $orderDir = isset($params['order'][0]['dir']) ? $params['order'][0]['dir'] : 'ASC';
+            // Parâmetros da requisição
+            $draw = $params['draw'] ?? 1;
+            $start = $params['start'] ?? 0;
+            $length = $params['length'] ?? 10;
+            $search = $params['search']['value'] ?? '';
             
-            // Se não houver colunas de busca definidas, usar todas as colunas ordenáveis
-            if (empty($searchableColumns)) {
-                $searchableColumns = $orderableColumns;
+            // Campos disponíveis
+            $fields = $this->fields_data();
+            $selectFields = implode(', ', $fields);
+            
+            // Ordenação
+            $orderColumn = isset($params['order'][0]['column']) ? $params['order'][0]['column'] : 0;
+            $orderDir = isset($params['order'][0]['dir']) ? strtoupper($params['order'][0]['dir']) : 'ASC';
+            
+            // Validação da direção da ordenação
+            if (!in_array($orderDir, ['ASC', 'DESC'])) {
+                $orderDir = 'ASC';
             }
             
             // Construção da query base
             $baseQuery = "FROM {$this->table}";
-            $whereClause = "";
+            $whereConditions = [];
+            $params = [];
             
-            // Adiciona busca se houver
-            if (!empty($search) && !empty($searchableColumns)) {
+            // Adiciona condição de busca
+            if (!empty($search)) {
                 $searchConditions = [];
-                foreach ($searchableColumns as $column) {
-                    $searchConditions[] = "$column LIKE :search";
+                foreach ($fields as $field) {
+                    $key = 'search_' . $field;
+                    $searchConditions[] = "{$field} LIKE :{$key}";
+                    $params[$key] = "%{$search}%";
                 }
-                $whereClause = " WHERE (" . implode(" OR ", $searchConditions) . ")";
+                $whereConditions[] = "(" . implode(" OR ", $searchConditions) . ")";
             }
             
+            $whereConditions[] = "(deleted_at IS NULL)";
+            
+            // Monta cláusula WHERE final
+            $whereClause = !empty($whereConditions) ? " WHERE " . implode(" AND ", $whereConditions) : "";
+            
             // Query para contar total de registros
-            $totalQuery = "SELECT COUNT(*) as total " . $baseQuery;
-            $stmt = $conn->query($totalQuery);
-            $recordsTotal = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+            $stmt = $conn->query("SELECT COUNT(*) as total FROM {$this->table} WHERE deleted_at IS NULL");
+            $totalRecords = $stmt->fetch()['total'];
             
             // Query para contar registros filtrados
             $filteredQuery = "SELECT COUNT(*) as total " . $baseQuery . $whereClause;
             $stmt = $conn->prepare($filteredQuery);
-            if (!empty($search) && !empty($searchableColumns)) {
-                $stmt->bindValue(':search', "%$search%", PDO::PARAM_STR);
+            foreach ($params as $key => $value) {
+                $stmt->bindValue(":{$key}", $value);
             }
             $stmt->execute();
-            $recordsFiltered = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
-            
-            // Definir ordenação
-            $orderByClause = "";
-            if ($orderColumn !== null && isset($orderableColumns[$orderColumn])) {
-                $orderByClause = " ORDER BY " . $orderableColumns[$orderColumn] . " " . $orderDir;
-            }
+            $filteredRecords = $stmt->fetch()['total'];
             
             // Query principal
-            $mainQuery = "SELECT * " . $baseQuery . $whereClause . $orderByClause . " LIMIT :start, :length";
+            $sql = "SELECT {$selectFields} " . $baseQuery . $whereClause;
             
-            $stmt = $conn->prepare($mainQuery);
-            if (!empty($search) && !empty($searchableColumns)) {
-                $stmt->bindValue(':search', "%$search%", PDO::PARAM_STR);
+            // Adiciona ordenação
+            if (isset($fields[$orderColumn])) {
+                $sql .= " ORDER BY " . $fields[$orderColumn] . " " . $orderDir;
             }
-            $stmt->bindValue(':start', (int)$start, PDO::PARAM_INT);
-            $stmt->bindValue(':length', (int)$length, PDO::PARAM_INT);
+            
+            // Adiciona limite e offset
+            $sql .= " LIMIT :limit OFFSET :offset";
+            
+            // Prepara e executa a query principal
+            $stmt = $conn->prepare($sql);
+            
+            // Bind dos parâmetros de busca
+            foreach ($params as $key => $value) {
+                $stmt->bindValue(":{$key}", $value);
+            }
+            
+            // Bind dos parâmetros de paginação
+            $stmt->bindValue(':limit', (int)$length, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', (int)$start, PDO::PARAM_INT);
+            
             $stmt->execute();
             $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
-            // Formatação da resposta no padrão do DataTables
-            $response = [
-                'draw' => (int)$draw,
-                'recordsTotal' => (int)$recordsTotal,
-                'recordsFiltered' => (int)$recordsFiltered,
-                'data' => $data
-            ];
+            // Adiciona os botões de ação
+            foreach ($data as &$row) {
+                $row['acoes'] = $this->generateActionButtons($row['id'], $this->table);
+                if (isset($row['creat_at'])) {
+                    $row['creat_at'] = date('d/m/Y - H:i', strtotime($row['creat_at']))."Hrs";
+                }
+                if (isset($row['update_at'])) {
+                    $row['update_at'] = date('d/m/Y - H:i', strtotime($row['update_at']))."Hrs";
+                }
+                if (isset($row['deleted_at'])) {
+                    $row['deleted_at'] = date('d/m/Y - H:i', strtotime($row['deleted_at']))."Hrs";
+                }
+
+            }
             
-            Database::close();
-            return json_encode($response);
-            
-        } catch(PDOException $e) {
-            error_log("Erro no DataTables: " . $e->getMessage());
-            Database::close();
             return json_encode([
-                'error' => $e->getMessage(),
-                'draw' => (int)$params['draw'],
-                'recordsTotal' => 0,
-                'recordsFiltered' => 0,
-                'data' => []
+                'draw' => (int)$draw,
+                'recordsTotal' => (int)$totalRecords,
+                'recordsFiltered' => (int)$filteredRecords,
+                'data' => $data
+            ]);
+            
+        } catch (Exception $e) {
+            return json_encode([
+                'error' => true,
+                'message' => $e->getMessage()
             ]);
         }
+    }
+
+    /**
+     * Retorna o nome do controller atual
+     */
+    protected function getControllerName() {
+        return $this->table;
+    }
+
+    public function get_erro() {
+        return $this->erro;
     }
 }

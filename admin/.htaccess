@@ -1,0 +1,7 @@
+RewriteEngine On
+RewriteBase /advocacia/admin/
+
+# Se o arquivo/diretório não existe, redireciona para index.php do admin
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]

@@ -223,6 +223,10 @@ class CSRF {
     public static function excludePath($path) {
         self::$excludedPaths[] = $path;
     }
+
+    public static function getTokenName() {
+        return self::TOKEN_NAME;
+    }
 }
 
 // Inicia a proteção CSRF automaticamente

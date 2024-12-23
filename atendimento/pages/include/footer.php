@@ -1,28 +1,16 @@
-<style>
-  body {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    margin: 0;
-  }
 
-  main {
-    flex: 1;
-  }
-
-  footer {
-    margin-top: 0; /* Removendo o margin-top existente */
-    position: relative;
-  }
-</style>
 
   <!-- ======= Footer ======= -->
   <footer id="footer" class="footer">
     <div class="copyright">
-      &copy; Copyright <?= date('Y') ?> <strong><span>Advocacia</span></strong>. Todos os direitos reservados
+      &copy; Copyright <strong><span>NiceAdmin</span></strong>. All Rights Reserved
     </div>
     <div class="credits">
-     Desenvolvido por <a href="https://mbdesign.com/">MBDesign - AGÊNCIA DIGITAL</a>
+      <!-- All the links in the footer should remain intact. -->
+      <!-- You can delete the links only if you purchased the pro version. -->
+      <!-- Licensing information: https://bootstrapmade.com/license/ -->
+      <!-- Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/nice-admin-bootstrap-admin-html-template/ -->
+      Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
     </div>
   </footer><!-- End Footer -->
 
@@ -37,12 +25,10 @@
   <script src="<?= base_url() ?>assets/vendor/simple-datatables/simple-datatables.js"></script>
   <script src="<?= base_url() ?>assets/vendor/tinymce/tinymce.min.js"></script>
   <script src="<?= base_url() ?>assets/vendor/php-email-form/validate.js"></script>
-  <!-- DataTables -->
-  <script src="<?= base_url() ?>assets/vendor/datatables/dataTables.min.js"></script>
 
   <!-- Template Main JS File -->
   <script src="<?= base_url() ?>assets/js/main.js"></script>
 
-</body>       
+</body>
 
 </html>

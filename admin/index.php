@@ -19,6 +19,7 @@ $rotas = [
     'logout' => ['LogoutController', 'index'],
     'processos' => ['ProcessosController', 'index', 'Processos'],
     'noticias' => ['NoticiasController', 'index', 'Noticias'],
+    'noticias-listar' => ['NoticiasController', 'listar', ''],
     'sobre' => ['SobreController', 'index', 'Sobre'],
     'areas-atuacao' => ['AreasAtuacaoController', 'index', 'Áreas de Atuação'],
     'contato' => ['ContatoController', 'index', 'Contato'],

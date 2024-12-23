@@ -1,5 +1,5 @@
 <?php
-require_once '../config/constants.php';
+require_once 'constants.php';
 
 class Database {
     private static $instance = null;
@@ -41,6 +41,6 @@ class Database {
     private function __clone() {}
 
     // Previne que a classe seja deserializada
-    private function __wakeup() {}
+    public function __wakeup() {}
 }
 ?>

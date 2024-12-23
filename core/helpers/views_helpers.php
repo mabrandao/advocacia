@@ -5,97 +5,105 @@ class ViewsHelpers
     /**
      * Gera uma tabela DataTable com processamento server-side
      * 
-     * @param array $config Configurações da tabela
-     *      - columns: Array com definições das colunas [
-     *          'title' => título da coluna,
-     *          'data' => nome do campo no banco/resposta,
-     *          'render' => função JS para renderizar o conteúdo (opcional),
-     *          'searchable' => boolean se permite busca (opcional),
-     *          'orderable' => boolean se permite ordenação (opcional)
-     *      ]
-     *      - url: URL para requisição AJAX
-     *      - id: ID da tabela (opcional, default: datatable)
-     *      - class: Classes CSS adicionais (opcional)
-     *      - language: URL do arquivo de tradução (opcional)
-     *      - buttons: Array com botões para exportação (opcional)
-     *      - order: Array com ordem inicial (opcional)
-     *      - pageLength: Registros por página (opcional)
+     * @param string $url URL para requisição AJAX
+     * @param array $campos Array com os campos a serem exibidos
      * @return array Array com HTML da tabela e script de inicialização
      */
-    public function ajaxDataTables($config)
+    public static function ajaxDataTables($url, $campos)
     {
         // Configurações padrão
-        $defaults = [
-            'id' => 'datatable',
-            'class' => 'table table-striped',
-            'language' => 'https://cdn.datatables.net/plug-ins/1.10.19/i18n/Portuguese-Brasil.json',
-            'buttons' => ['copy', 'csv', 'excel', 'pdf', 'print'],
-            'pageLength' => 10,
-            'order' => [[0, 'desc']]
+        $config = [
+            'processing' => true,
+            'serverSide' => true,
+            'ajax' => [
+                'url' => base_url() . $url,
+                'type' => 'POST',
+                'data' => 'function(d) { return d; }'
+            ],
+            'columns' => [],
+            'language' => [
+                'url' => base_url() . 'assets/vendor/datatables/pt-BR.json'
+            ],
+            'pageLength' => 25,
+            'dom' => "<'row text-center mb-3'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" .
+                    "<'row'<'col-sm-12'tr>>" .
+                    "<'row mt-3'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7 d-flex justify-content-end'p>>" .
+                    "<'row text-center mt-3'<'col-12'B>>",
+            'buttons' => [
+                [
+                    'extend' => 'copy',
+                    'text' => '<i class="bi bi-clipboard"></i> Copiar',
+                    'className' => 'btn btn-secondary'
+                ],
+                [
+                    'extend' => 'excel',
+                    'text' => '<i class="bi bi-file-earmark-excel"></i> Excel',
+                    'className' => 'btn btn-success'
+                ],
+                [
+                    'extend' => 'pdf',
+                    'text' => '<i class="bi bi-file-earmark-pdf"></i> PDF',
+                    'className' => 'btn btn-danger'
+                ],
+                [
+                    'extend' => 'print',
+                    'text' => '<i class="bi bi-printer"></i> Imprimir',
+                    'className' => 'btn btn-info'
+                ]
+            ]
         ];
 
-        // Mescla configurações padrão com as fornecidas
-        $config = array_merge($defaults, $config);
-
-        // Gera cabeçalho da tabela
-        $headers = '';
-        foreach ($config['columns'] as $column) {
-            $headers .= "<th>{$column['title']}</th>";
-        }
-
-        // Gera HTML da tabela
-        $table = "<table id=\"{$config['id']}\" class=\"{$config['class']}\" style=\"width:100%\">
-                    <thead>
-                        <tr>{$headers}</tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>";
-
-        // Gera definições das colunas para o DataTables
-        $columnDefs = [];
-        foreach ($config['columns'] as $i => $column) {
-            $def = [
-                'data' => $column['data'],
-                'name' => $column['data'],
-                'targets' => $i
+        // Gera as colunas baseado nos campos informados
+        foreach ($campos as $campo) {
+            $config['columns'][] = [
+                'data' => $campo,
+                'title' => ucfirst($campo),
+                'orderable' => true,
+                'searchable' => true
             ];
-
-            if (isset($column['render'])) {
-                $def['render'] = $column['render'];
-            }
-            if (isset($column['searchable'])) {
-                $def['searchable'] = $column['searchable'];
-            }
-            if (isset($column['orderable'])) {
-                $def['orderable'] = $column['orderable'];
-            }
-
-            $columnDefs[] = $def;
         }
 
-        // Gera script de inicialização
-        $script = "<script>
+        // Adiciona a coluna de ações
+        $config['columns'][] = [
+            'title' => 'Ações',
+            'data' => 'acoes',
+            'orderable' => false,
+            'searchable' => false,
+            'className' => 'text-center'
+        ];
+
+        // Gera o HTML da tabela
+        $table = '<table id="datatable" class="table table-striped">';
+        $table .= '<thead><tr>';
+        foreach ($config['columns'] as $column) {
+            $table .= '<th>' . $column['title'] . '</th>';
+        }
+        $table .= '</tr></thead>';
+        $table .= '<tbody></tbody>';
+        $table .= '</table>';
+
+        // Gera o script de inicialização
+        $script = '
+        <script>
             $(document).ready(function() {
-                $('#{$config['id']}').DataTable({
+                $("#datatable").DataTable({
                     processing: true,
                     serverSide: true,
                     responsive: true,
                     ajax: {
-                        url: '{$config['url']}',
-                        type: 'POST',
+                        url: "'. $config['ajax']['url'] . '",
+                        type: "'. $config['ajax']['type'] . '",
                         data: function(d) {
-                            // Adiciona dados extras se necessário
                             return d;
                         }
                     },
-                    columnDefs: " . json_encode($columnDefs) . ",
-                    order: " . json_encode($config['order']) . ",
-                    pageLength: {$config['pageLength']},
+                    columns: ' . json_encode($config['columns']) . ',
                     language: {
-                        url: '{$config['language']}'
+                        url:  "'. $config['language']['url'] . '"
                     },
-                    dom: 'Bfrtip',
-                    buttons: " . json_encode($config['buttons']) . ",
+                    pageLength: ' . $config['pageLength'] . ',
+                    dom: "' . $config['dom'] . '",
+                    buttons: ' . json_encode($config['buttons']) . ',
                     initComplete: function(settings, json) {
                         // Callback após inicialização
                     },
@@ -103,14 +111,14 @@ class ViewsHelpers
                         // Callback após cada redesenho
                     },
                     error: function(xhr, error, thrown) {
-                        console.error('Erro no DataTable:', error);
+                        console.error("Erro no DataTable:", error);
                     }
                 });
             });
-        </script>";
+        </script>';
 
         return [
-            'tabela' => $table,
+            'table' => $table,
             'script' => $script
         ];
     }
@@ -118,39 +126,14 @@ class ViewsHelpers
     /**
      * Exemplo de uso:
      * 
-     * $config = [
-     *     'columns' => [
-     *         [
-     *             'title' => 'ID',
-     *             'data' => 'id'
-     *         ],
-     *         [
-     *             'title' => 'Nome',
-     *             'data' => 'nome',
-     *             'render' => 'function(data, type, row) {
-     *                 return '<a href="/view/'+row.id+'">'+data+'</a>';
-     *             }'
-     *         ],
-     *         [
-     *             'title' => 'Ações',
-     *             'data' => null,
-     *             'render' => 'function(data, type, row) {
-     *                 return '<button onclick="editar('+row.id+')">Editar</button>';
-     *             }',
-     *             'orderable': false,
-     *             'searchable': false
-     *         ]
-     *     ],
-     *     'url' => '/api/dados',
-     *     'id' => 'minha-tabela',
-     *     'class' => 'table table-hover',
-     *     'buttons' => ['excel', 'pdf'],
-     *     'order' => [[1, 'asc']],
-     *     'pageLength' => 25
+     * $campos = [
+     *     'id',
+     *     'nome',
+     *     'botoes'
      * ];
      * 
-     * $datatable = $viewHelper->ajaxDataTables($config);
-     * echo $datatable['tabela'];
+     * $datatable = $viewHelper->ajaxDataTables('/api/dados', $campos);
+     * echo $datatable['table'];
      * echo $datatable['script'];
      */
 

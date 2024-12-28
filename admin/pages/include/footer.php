@@ -36,41 +36,14 @@
   <script src="<?= base_url() ?>assets/vendor/echarts/echarts.min.js"></script>
   <script src="<?= base_url() ?>assets/vendor/quill/quill.js"></script>
   <script src="<?= base_url() ?>assets/vendor/simple-datatables/simple-datatables.js"></script>
-  <script src="<?= base_url() ?>assets/vendor/tinymce/tinymce.min.js"></script>
+  
   <script src="<?= base_url() ?>assets/vendor/php-email-form/validate.js"></script>
   <!-- DataTables -->
   <script src="<?= base_url() ?>assets/vendor/datatables/dataTables.min.js"></script>
+  <script src="<?= base_url() ?>assets/vendor/ckeditor/build/ckeditor5-flmngr.js"></script>
 
   <!-- Template Main JS File -->
   <script src="<?= base_url() ?>assets/js/main.js"></script>
-
-  <script>
-    // Função para inicializar tooltips
-    function initTooltips() {
-      var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-      tooltipTriggerList.forEach(function(tooltipTriggerEl) {
-        var tooltip = bootstrap.Tooltip.getInstance(tooltipTriggerEl);
-        if (tooltip) {
-          tooltip.dispose();
-        }
-        new bootstrap.Tooltip(tooltipTriggerEl, {
-          trigger: 'hover'
-        });
-      });
-    }
-
-    // Inicializa tooltips quando o DOM estiver pronto
-    document.addEventListener('DOMContentLoaded', function() {
-      initTooltips();
-    });
-
-    // Reinicializa tooltips após cada draw do DataTables
-    $(document).on('draw.dt', function() {
-      setTimeout(function() {
-        initTooltips();
-      }, 100);
-    });
-  </script>
 
 </body>       
 

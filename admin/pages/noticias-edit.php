@@ -1,23 +1,23 @@
 <main id="main" class="main">
 
-    <div class="pagetitle">
+  <div class="pagetitle">
       <h1><?= isset($title) ? $title : "" ?> Noticias</h1>
-      <nav>
-        <ol class="breadcrumb">
+    <nav>
+      <ol class="breadcrumb">
           <li class="breadcrumb-item"><a href="<?=base_url()?>">Home</a></li>
           <li class="breadcrumb-item active"><?= isset($tipo) ? $tipo : "" ?> Noticias</li>
-        </ol>
-      </nav>
+      </ol>
+    </nav>
     </div><!-- End Page Title -->
 
-    <section class="section">
-      <div class="card">
-        <div class="card-body">
+  <section class="section">
+        <div class="card">
+          <div class="card-body">
           <div class="card-header">
-            <h3 class="card-title">Nova Notícia</h3>
-          </div>          
+            <h3 class="card-title"><?= isset($title) ? $title : "" ?> Notícia</h3>
+              </div>
           <?php 
-          
+         
           $param = [
            'action' => "admin/noticias-".$tipo,
            'hidden' => [
@@ -75,8 +75,8 @@
                    'name' => 'content',
                    'type' => 'textarea',
                    'label' => 'Conteúdo da Notícia',
-                   'class' => 'tinymce-editor',
-                   'value' => isset($noticia["content"]) ? $noticia["content"] : "Escreva aqui o conteudo da noticia",
+                   'class' => 'form-control editor', 
+                   'value' => isset($noticia["content"]) ? $noticia["content"] : "",
                    'required' => true,
                    'col' => 'col-md-12',
                    'id' => 'content'
@@ -98,8 +98,8 @@
       
       echo ViewsHelpers::creatForm($param);
        ?>
-        </div>
       </div>
-    </section>
+    </div>
+  </section>
 
 </main><!-- End #main -->

@@ -22,7 +22,7 @@ $rotas = [
     'noticias' => ['NoticiasController', 'index', 'Noticias'],
     'noticias-listar' => ['NoticiasController', 'listar', ''],
     'noticias-store' => ['NoticiasController', 'store', 'Cadastrar Noticia'],
-    'noticias-edit' => ['NoticiasController', 'edit', 'Editar Noticia'],
+    'noticias-editar' => ['NoticiasController', 'edit', 'Editar Noticia'],
     'noticias-delete' => ['NoticiasController', 'delete', ''],
     
     'sobre' => ['SobreController', 'index', 'Sobre'],

@@ -14,14 +14,14 @@
       <div class="card">
         <div class="card-body">
           <h5 class="card-title">
-            <a class="btn btn-primary" href="admin/noticia-nova">
+            <a class="btn btn-primary" href="<?=base_url()?>admin/noticias-store">
               <i class="bi bi-plus-circle"></i> Nova Notícia
             </a>
           </h5>
           
           <?php
             $table = ViewsHelpers::ajaxDataTables("admin/noticias-listar", $filds);
-            echo $table['table'];           
+            echo $table['table'];   
           ?>
           
         </div>

@@ -15,7 +15,9 @@ class ControllerAdmin
 
     public function loadPage($page, $params = array()) {
         // Extrai as variáveis do array para ficarem disponíveis na view
-        extract($params);
+        if (!empty($params)) {
+            extract($params);
+        }
         
         include_once('pages/include/header.php');
         include_once("pages/{$page}.php");

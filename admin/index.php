@@ -28,6 +28,7 @@ $rotas = [
     'sobre' => ['SobreController', 'index', 'Sobre'],
     'areas-atuacao' => ['AreasAtuacaoController', 'index', 'Áreas de Atuação'],
     'contato' => ['ContatoController', 'index', 'Contato'],
+    'arquivos' => ['DashboardController', 'arquivos', 'Gerenciamento de Arquivos'],
     '404' => ['ErrorController', 'index', 'Página Não Encontrada']
 ];
 

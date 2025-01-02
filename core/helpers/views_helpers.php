@@ -152,7 +152,7 @@ class ViewsHelpers
             $col = isset($field['col']) ? $field['col'] : 'col-md-6';
 
             $form .= '<div class="'.$col.'">';
-            $form .= '<div class="form-group mb-3">';
+            $form .= '<div class="form-group my-2">';
             $form .= '<label for="'.$field['name'].'" class="form-label">'.$field['label'].'</label>';
 
             switch ($field['type']) {
@@ -186,6 +186,16 @@ class ViewsHelpers
                         }
                     }
                     break;
+                case 'input-group':
+                    $form .= '<div class="input-group">
+                                <div class="input-group-prepend">
+                                    <button class="btn btn-secondary" type="button" id="btn-file">Selecione</button>
+                                </div>
+                               <input type="'.$field['type'].'" class="form-control '.$class.'" 
+                        id="'.$field['name'].'" name="'.$field['name'].'" value="'.$value.'" 
+                        '.$required.' '.$placeholder.' aria-describedby="btn-file">
+                                </div>';
+                    break;
 
                 default:
                     $form .= '<input type="'.$field['type'].'" class="form-control '.$class.'" 
@@ -212,7 +222,7 @@ class ViewsHelpers
             }
         } else {
             $form .= '<button type="submit" class="btn btn-primary me-2">Salvar</button>';
-            $form .= '<a href="'.base_url().'admin/'.$back.'" class="btn btn-secondary">Voltar</a>';
+            $form .= '<a href="'.base_url().$back.'" class="btn btn-secondary">Voltar</a>';
         }
         $form .= '</div></div>';
 

@@ -5,7 +5,7 @@
 * Author: BootstrapMade.com
 * License: https://bootstrapmade.com/license/
 */
-(function() {
+$(document).ready(function() {
   "use strict";
 
   /**
@@ -124,11 +124,8 @@
       });
     });
   }
-
-  // Inicializa tooltips quando o DOM estiver pronto
-  document.addEventListener('DOMContentLoaded', function() {
-    initTooltips();
-  });
+  
+  initTooltips();  
 
   // Reinicializa tooltips após cada draw do DataTables
   $(document).on('draw.dt', function() {
@@ -169,5 +166,5 @@
       }).observe(mainContainer);
     }, 200);
   }
-
-})();
+  
+});

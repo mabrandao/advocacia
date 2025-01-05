@@ -52,12 +52,12 @@ class ViewsHelpers
                 ]
             ]
         ];
-
+        
         // Gera as colunas baseado nos campos informados
-        foreach ($campos as $campo) {
+        foreach ($campos as $coluna => $rotulo) {
             $config['columns'][] = [
-                'data' => $campo,
-                'title' => ucfirst($campo),
+                'data' => $coluna,  // Nome da coluna no banco de dados (sem acento)
+                'title' => $rotulo, // Rótulo para exibição (pode ter acento)
                 'orderable' => true,
                 'searchable' => true
             ];
@@ -68,15 +68,14 @@ class ViewsHelpers
             'title' => 'Ações',
             'data' => 'acoes',
             'orderable' => false,
-            'searchable' => false,
-            'className' => 'text-center'
+            'searchable' => false,            
         ];
 
         // Gera o HTML da tabela
-        $table = '<table id="datatable" class="table table-striped">';
+        $table = '<table id="datatable" class="table table-striped table-sm table-hover table-bordered">';
         $table .= '<thead><tr>';
         foreach ($config['columns'] as $column) {
-            $table .= '<th>' . $column['title'] . '</th>';
+            $table .= '<th class="text-center">' . $column['title'] . '</th>';
         }
         $table .= '</tr></thead>';
         $table .= '<tbody></tbody>';

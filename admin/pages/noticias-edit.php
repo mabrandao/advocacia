@@ -82,55 +82,113 @@
     </div>
   </section>
 
+  <style>
+    /* Garante que nosso modal fique sempre na frente */
+    .modal-backdrop {
+        z-index: 1055 !important;
+    }
+    #fileManagerModal {
+        z-index: 1056 !important;
+    }
+  </style>
+
   <!-- Modal -->
-  <div class="modal" id="fileManagerModal" tabindex="-1000">
-    <div class="modal-dialog modal-fullscreen" role="document">
+  <div class="modal" id="fileManagerModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="fileManagerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
       <div class="modal-content">
-        <div class="modal-body">
-          <iframe id="fileManagerIframe" src="" style="width: 100%; height: 400px; border: none;"></iframe>
+        <div class="modal-header">
+          <h5 class="modal-title" id="fileManagerModalLabel">Gerenciador de Arquivos</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
         </div>
-        <div class="modal-footer justify-content-center">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Voltar</button>
+        <div class="modal-body p-0">
+          <iframe id="fileManagerIframe" src="" style="width: 100%; height: calc(100vh - 130px); border: none;" tabindex="-1"></iframe>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
         </div>
       </div>
     </div>
   </div>
 
-</main><!-- End #main -->
+  <script src="<?=base_url().'assets/vendor/tinymce/tinymce.min.js'?>"></script>
 
-<script src="<?=base_url().'assets/vendor/tinymce/tinymce.min.js'?>"></script>
+  <script>
+    // Variável global para armazenar o callback
+    let imageCallback;
 
-<script>
-  tinymce.init({
-    selector: 'textarea#content',
-    height: 500,
-    language: 'pt_BR',
-    license_key: 'gpl',
-    theme: 'silver',
-    plugins: [
-        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'emoticons',
-        'fullscreen', 'insertdatetime', 'media', 'nonbreaking',
-        'pagebreak', 'preview', 'save', 'searchreplace', 'visualblocks',
-        'visualchars', 'wordcount', 'code'
-    ],
-    toolbar: [
-        'undo redo | styleselect | bold italic underline | alignleft aligncenter alignright alignjustify | outdent indent | bullist numlist | link image media | charmap emoticons | fullscreen preview | code',
-        'insertdatetime | pagebreak | save | help | searchreplace | visualblocks visualchars | nonbreaking | quickbars | table'
-    ],
-    image_advtab: true,
-    skin: 'oxide',
-    content_css: 'default',
-    icons: 'default',
-
-    // Configuração do gerenciador de arquivos
-    file_picker_types: 'image',
-    file_picker_callback: function(callback, value, meta) {
-        if (meta.filetype === 'image') {
-            // Lógica para abrir o Tiny File Manager no modal
-            var fileManagerUrl = '<?= base_url() ?>gerenciador/tinyfilemanager.php?tokenrr=dfbs8fgd61vdfvdv542@ff#&52364'; // Altere para o caminho correto
-            document.getElementById('fileManagerIframe').src = fileManagerUrl; // Define a URL do Tiny File Manager no iframe
-            $('#fileManagerModal').modal('show'); // Exibe o modal
+    // Função para receber a URL da imagem selecionada do iframe
+    window.addEventListener('message', function(e) {
+        if (e.data.mceAction === 'FileSelected') {
+            if (typeof imageCallback === 'function') {
+                imageCallback(e.data.url);
+                imageCallback = null;
+                $('#fileManagerModal').modal('hide');
+            }
         }
-    }
-  });
-</script>
+    });
+
+    tinymce.init({
+        selector: '#content',
+        height: 500,
+        language: 'pt_BR',
+        license_key: 'gpl',
+        theme: 'silver',
+        plugins: [
+            'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'emoticons',
+            'fullscreen', 'insertdatetime', 'media', 'nonbreaking',
+            'pagebreak', 'preview', 'save', 'searchreplace', 'visualblocks',
+            'visualchars', 'wordcount', 'code'
+        ],
+        toolbar: [
+            'undo redo | styleselect | bold italic underline | alignleft aligncenter alignright alignjustify | outdent indent | bullist numlist | link image media | charmap emoticons | fullscreen preview | code',
+            'insertdatetime | pagebreak | save | help | searchreplace | visualblocks visualchars | nonbreaking | quickbars | table'
+        ],
+        image_advtab: true,
+        skin: 'oxide',
+        content_css: 'default',
+        icons: 'default',
+        
+        // Configuração do gerenciador de arquivos
+        file_picker_types: 'image',
+        file_picker_callback: function(cb, value, meta) {
+            if (meta.filetype === 'image') {
+                imageCallback = cb;
+                
+                // Abre nosso modal
+                var fileManagerUrl = '<?= base_url() ?>gerenciador/tinyfilemanager.php?tokenrr=dfbs8fgd61vdfvdv542@ff52364';
+                document.getElementById('fileManagerIframe').src = fileManagerUrl;
+                
+                // Força o nosso modal a ficar por cima
+                $('#fileManagerModal').css('z-index', 999999);
+                $('.modal-backdrop').css('z-index', 999998);
+                
+                // Mostra o modal
+                $('#fileManagerModal').modal('show');
+                
+                // Previne que o modal do TinyMCE interfira
+                $('.tox-dialog-wrap').hide();
+            }
+        },
+        
+        // Configurações adicionais de imagem
+        image_title: true,
+        image_description: false,
+        image_dimensions: false,
+        image_class_list: [
+            {title: 'Responsiva', value: 'img-fluid'}
+        ],
+        
+        // Permite upload direto de imagens
+        automatic_uploads: true
+    });
+
+    // Previne problemas de foco
+    document.getElementById('fileManagerModal').addEventListener('shown.bs.modal', function (e) {
+        e.preventDefault();
+        setTimeout(function() {
+            document.getElementById('fileManagerIframe').focus();
+        }, 100);
+    });
+  </script>
+
+</main><!-- End #main -->

@@ -5062,6 +5062,14 @@ function fm_show_header_login()
                     $(target).removeClass('hidden');
                 });
             });
+            
+        </script>
+        <script>
+        function retornar_caminho(url) {
+            if (window.parent.imageCallback) {
+                window.parent.imageCallback(url);
+            }
+        }
         </script>
 
         <?php if (isset($_GET['edit']) && isset($_GET['env']) && FM_EDIT_FILE && !FM_READONLY):

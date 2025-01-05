@@ -364,7 +364,7 @@ abstract class Model {
             $search = $params['search']['value'] ?? '';
             
             // Campos disponíveis
-            $fields = $this->fields_data();
+            $fields = array_keys($this->fields_data());
             $selectFields = implode(', ', $fields);
             
             // Ordenação
@@ -439,14 +439,17 @@ abstract class Model {
             // Adiciona os botões de ação
             foreach ($data as &$row) {
                 $row['acoes'] = $this->generateActionButtons($row['id'], $this->table, $exibir);
-                if (isset($row['creat_at'])) {
-                    $row['creat_at'] = date('d/m/Y - H:i', strtotime($row['creat_at']))."Hrs";
+                if (isset($row['created_at'])) {
+                    $row['created_at'] = date('d/m/Y - H:i', strtotime($row['created_at']));
                 }
                 if (isset($row['update_at'])) {
                     $row['update_at'] = date('d/m/Y - H:i', strtotime($row['update_at']))."Hrs";
                 }
                 if (isset($row['deleted_at'])) {
                     $row['deleted_at'] = date('d/m/Y - H:i', strtotime($row['deleted_at']))."Hrs";
+                }
+                if (isset($row['image'])) {
+                    $row['image'] = "<img src='" . base_url() ."assets/img/upload/". $row['image'] . "' alt='" . $row['image'] . "'>";
                 }
 
             }

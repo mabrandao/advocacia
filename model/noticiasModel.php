@@ -23,20 +23,20 @@ class NoticiasModel extends Model {
             'image',
             'content',
             'galeria',
-            'creat_at',
-            'update_at',
+            'created_at',
+            'updated_at',
             'deleted_at'
         ];
     }
 
     public function fields_data() {
         return [
-            'id',            
-            'categoria',
-            'titulo'  ,
-            'image',            
-            'galeria', 
-            'creat_at',       
+            'id' => 'ID',            
+            'categoria' => 'Categoria',
+            'titulo' => 'Título',
+            'image' => 'Imagem',            
+            'galeria' => 'Galeria', 
+            'created_at' => 'Criada em'      
         ];
     }
 

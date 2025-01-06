@@ -1,0 +1,29 @@
+:root {
+    /* Cores principais */
+    --primary-color: #001B3F;     /* Azul marinho escuro */
+    --secondary-color: #FF0033;   /* Vermelho vibrante */
+    --white: #FFFFFF;             /* Branco */
+    --light-gray: #F5F5F5;        /* Cinza claro */
+    
+    /* Cores de texto */
+    --text-primary: var(--primary-color);
+    --text-light: var(--white);
+    --text-gray: #9f9f9f;
+    
+    /* Cores de fundo */
+    --bg-primary: var(--primary-color);
+    --bg-secondary: var(--secondary-color);
+    --bg-light: var(--light-gray);
+    --bg-white: var(--white);
+    
+    /* Cores de destaque */
+    --accent-color: var(--secondary-color);
+    --hover-color: #cc0029;       /* Vermelho mais escuro para hover */
+    
+    /* Cores de elementos específicos */
+    --header-bg: var(--primary-color);
+    --footer-bg: var(--primary-color);
+    --nav-link-color: var(--white);
+    --button-primary-bg: var(--secondary-color);
+    --button-primary-text: var(--white);
+}

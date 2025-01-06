@@ -1,0 +1,140 @@
+@import 'variables.css';
+
+/* Cores de fundo */
+body {
+    background-color: var(--bg-white);
+    color: var(--text-primary);
+}
+
+.page-head {
+    background-color: var(--header-bg);
+}
+
+.bg-black,
+.bg-primary {
+    background-color: var(--primary-color) !important;
+}
+
+/* Textos */
+.text-primary {
+    color: var(--secondary-color) !important;
+}
+
+/* Botões */
+.button-primary-outline-v2 {
+    color: var(--white);
+    border-color: var(--secondary-color);
+}
+
+.button-primary-outline-v2:hover {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+    color: var(--white);
+}
+
+/* Slider */
+.slider-header {
+    color: var(--white);
+}
+
+.slider-text {
+    color: var(--light-gray);
+}
+
+/* Navegação */
+.rd-navbar {
+    background-color: var(--primary-color) !important;
+}
+
+.rd-navbar-static .rd-navbar-nav > li > a,
+.rd-navbar-fixed .rd-navbar-nav > li > a {
+    color: var(--white) !important;
+}
+
+.rd-navbar-static .rd-navbar-nav > li > a:hover,
+.rd-navbar-fixed .rd-navbar-nav > li > a:hover {
+    color: var(--secondary-color) !important;
+}
+
+/* Logo */
+.rd-navbar-brand svg {
+    fill: var(--white) !important;
+}
+
+/* Cabeçalhos */
+.header-decorated h3 {
+    color: var(--secondary-color);
+}
+
+/* Links */
+a {
+    color: var(--secondary-color);
+}
+
+a:hover {
+    color: var(--hover-color);
+}
+
+/* Swiper */
+.swiper-pagination-bullet-active {
+    background: var(--secondary-color);
+}
+
+/* Footer */
+.page-foot {
+    background-color: var(--primary-color);
+    color: var(--light-gray);
+}
+
+.page-foot a {
+    color: var(--white);
+}
+
+.page-foot a:hover {
+    color: var(--secondary-color);
+}
+
+/* Top Bar */
+.rd-navbar-top-panel {
+    background-color: var(--primary-color);
+}
+
+.rd-navbar-top-panel a,
+.rd-navbar-top-panel-content {
+    color: var(--white) !important;
+}
+
+/* Botão de Menu Mobile */
+.rd-navbar-toggle span,
+.rd-navbar-toggle span:before,
+.rd-navbar-toggle span:after {
+    background-color: var(--white);
+}
+
+/* Menu Mobile */
+.rd-navbar-fixed .rd-navbar-panel {
+    background-color: var(--primary-color);
+}
+
+/* Atendimento Button */
+.button.button-primary {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+    color: var(--white);
+}
+
+/* Títulos */
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6, .h7 {
+    color: var(--primary-color);
+}
+
+/* Carousel e elementos interativos */
+.owl-dot.active,
+.owl-dot:hover {
+    background: var(--accent-color);
+}
+
+/* Elementos de destaque */
+.bg-secondary {
+    background-color: var(--secondary-color);
+}

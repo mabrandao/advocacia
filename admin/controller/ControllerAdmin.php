@@ -1,4 +1,5 @@
 <?php
+
 include_once('../core/helpers/redirects.php');
 require_once('../core/config/session.php');
 include_once('../core/helpers/views_helpers.php');

@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="<?=assets_url()?>css/fonts.css">
     <link rel="stylesheet" href="<?=assets_url()?>css/bootstrap.css">
     <link rel="stylesheet" href="<?=assets_url()?>css/style.css">
+    <link rel="stylesheet" href="<?=assets_url()?>css/variables.css">
+    <link rel="stylesheet" href="<?=assets_url()?>css/theme-override.css">
 		<!--[if lt IE 10]>
     <div style="background: #212121; padding: 10px 0; box-shadow: 3px 3px 5px 0 rgba(0,0,0,.3); clear: both; text-align:center; position: relative; z-index:1;"><a href="http://windows.microsoft.com/en-US/internet-explorer/"><img src="<?=assets_url()?>images/ie8-panel/warning_bar_0000_us.jpg" border="0" height="42" width="820" alt="Você está usando um navegador desatualizado. Para uma experiência de navegação mais rápida e segura, atualize gratuitamente agora."></a></div>
     <script src="js/html5shiv.min.js"></script>
@@ -63,7 +65,7 @@
               </div>
               <div class="rd-navbar-group">
                 <div class="rd-navbar-panel">
-                  <button class="rd-navbar-toggle" data-rd-navbar-toggle=".rd-navbar-nav-wrap"><span></span></button><a class="rd-navbar-brand brand" href="index.html"><img src="<?=assets_url()?>images/logo-default-143x27.png" alt="" width="143" height="27"/></a>
+                  <button class="rd-navbar-toggle" data-rd-navbar-toggle=".rd-navbar-nav-wrap"><span></span></button><a class="rd-navbar-brand brand" href="index.html"><img src="<?=assets_url()?>images/logo.png" style="height:50px"/></a>
                 </div>
                 <div class="rd-navbar-nav-wrap">
                   <div class="rd-navbar-nav-inner">

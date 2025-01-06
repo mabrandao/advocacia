@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 21/12/2024 às 02:39
+-- Tempo de geração: 06/01/2025 às 05:22
 -- Versão do servidor: 10.4.32-MariaDB
 -- Versão do PHP: 8.2.12
 
@@ -43,6 +43,15 @@ CREATE TABLE `agenda` (
   `deleted_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Despejando dados para a tabela `agenda`
+--
+
+INSERT INTO `agenda` (`id`, `processo_id`, `tipo`, `data_hora`, `local`, `descricao`, `status`, `observacoes`, `link_virtual`, `lembrete_enviado`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 'Audi├¬ncia', '2025-01-19 22:32:12', 'F├│rum Central', 'Primeira audi├¬ncia', 'agendada', NULL, NULL, 0, '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL),
+(2, 2, 'Reuni├úo', '2024-12-27 22:32:12', 'Escrit├│rio', 'Reuni├úo com cliente', 'agendada', NULL, NULL, 0, '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL),
+(3, 3, 'Prazo', '2025-01-04 22:32:12', 'N/A', 'Prazo para recurso', 'agendada', NULL, NULL, 0, '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -62,6 +71,15 @@ CREATE TABLE `andamentos_processo` (
   `deleted_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Despejando dados para a tabela `andamentos_processo`
+--
+
+INSERT INTO `andamentos_processo` (`id`, `processo_id`, `data_andamento`, `tipo_andamento`, `descricao`, `usuario_id`, `arquivo_anexo`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, '2024-12-20 22:32:12', 'Peti├º├úo Inicial', 'Protocolo da peti├º├úo inicial', 1, NULL, '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL),
+(2, 1, '2024-12-25 22:32:12', 'Despacho', 'Despacho inicial do juiz', 1, NULL, '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL),
+(3, 2, '2024-12-20 22:32:12', 'Audi├¬ncia', 'Designada audi├¬ncia inicial', 2, NULL, '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -79,6 +97,15 @@ CREATE TABLE `areas_atuacao` (
   `deleted_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Despejando dados para a tabela `areas_atuacao`
+--
+
+INSERT INTO `areas_atuacao` (`id`, `nome`, `descricao`, `icone`, `ativo`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 'Direito Civil', 'Processos de direito civil em geral', 'civil-icon', 1, '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL),
+(2, 'Direito Trabalhista', 'Causas trabalhistas e direitos do trabalho', 'trabalho-icon', 1, '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL),
+(3, 'Direito Familiar', 'Processos de fam├¡lia e sucess├Áes', 'familia-icon', 1, '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -93,6 +120,15 @@ CREATE TABLE `auditoria` (
   `dados` text DEFAULT NULL,
   `data_hora` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Despejando dados para a tabela `auditoria`
+--
+
+INSERT INTO `auditoria` (`id`, `usuario_id`, `tabela`, `acao`, `dados`, `data_hora`) VALUES
+(1, 1, 'usuarios', 'criar', '{\"usuario_id\": 4}', '2024-12-20 22:32:12'),
+(2, 2, 'processos', 'atualizar', '{\"processo_id\": 1}', '2024-12-20 22:32:12'),
+(3, 3, 'documentos', 'deletar', '{\"documento_id\": 2}', '2024-12-20 22:32:12');
 
 -- --------------------------------------------------------
 
@@ -120,6 +156,15 @@ CREATE TABLE `clientes` (
   `deleted_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Despejando dados para a tabela `clientes`
+--
+
+INSERT INTO `clientes` (`id`, `usuario_id`, `cpf_cnpj`, `rg`, `data_nascimento`, `telefone`, `celular`, `endereco`, `bairro`, `cidade`, `estado`, `cep`, `profissao`, `estado_civil`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 4, '123.456.789-00', '12.345.678-9', '1980-01-01', '(11) 3333-4444', '(11) 99999-8888', 'Rua A, 123', NULL, 'S├úo Paulo', 'SP', '01234567', NULL, NULL, '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL),
+(2, 5, '987.654.321-00', '98.765.432-1', '1990-05-15', '(11) 4444-5555', '(11) 98888-7777', 'Rua B, 456', NULL, 'S├úo Paulo', 'SP', '04567890', NULL, NULL, '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL),
+(3, 6, '456.789.123-00', '45.678.912-3', '1985-12-30', '(11) 5555-6666', '(11) 97777-6666', 'Rua C, 789', NULL, 'S├úo Paulo', 'SP', '06789012', NULL, NULL, '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -137,6 +182,15 @@ CREATE TABLE `conversas` (
   `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `deleted_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Despejando dados para a tabela `conversas`
+--
+
+INSERT INTO `conversas` (`id`, `cliente_id`, `assunto`, `processo_id`, `status`, `data_ultima_mensagem`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 'D├║vidas sobre processo', 1, 'aberta', NULL, '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL),
+(2, 2, 'Documenta├º├úo pendente', 2, 'aberta', NULL, '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL),
+(3, 3, 'Agendamento de reuni├úo', 3, 'fechada', NULL, '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL);
 
 -- --------------------------------------------------------
 
@@ -161,6 +215,15 @@ CREATE TABLE `documentos` (
   `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `deleted_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Despejando dados para a tabela `documentos`
+--
+
+INSERT INTO `documentos` (`id`, `nome`, `descricao`, `arquivo`, `tipo_documento`, `processo_id`, `cliente_id`, `usuario_id`, `categoria`, `tags`, `tamanho_arquivo`, `formato`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 'Peti├º├úo Inicial', 'Peti├º├úo inicial do processo', 'peticao_inicial_1.pdf', 'processo', 1, 1, 1, NULL, NULL, NULL, NULL, '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL),
+(2, 'Procura├º├úo', 'Procura├º├úo do cliente', 'procuracao_1.pdf', 'documento', 1, 1, 1, NULL, NULL, NULL, NULL, '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL),
+(3, 'Documentos Pessoais', 'Documentos pessoais do cliente', 'docs_pessoais_1.pdf', 'documento', 2, 2, 2, NULL, NULL, NULL, NULL, '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL);
 
 -- --------------------------------------------------------
 
@@ -190,6 +253,15 @@ CREATE TABLE `faturas` (
   `deleted_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Despejando dados para a tabela `faturas`
+--
+
+INSERT INTO `faturas` (`id`, `cliente_id`, `processo_id`, `numero_fatura`, `parcela`, `total_parcelas`, `valor`, `desconto`, `juros`, `valor_total`, `status_pagamento`, `metodo_pagamento`, `vencimento`, `data_pagamento`, `comprovante_pagamento`, `observacoes`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 1, 'FAT-2024-001', NULL, NULL, 1000.00, NULL, NULL, 1000.00, 'pendente', NULL, '2025-01-19', NULL, NULL, NULL, '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL),
+(2, 2, 2, 'FAT-2024-002', NULL, NULL, 2000.00, NULL, NULL, 2000.00, 'pago', NULL, '2025-01-04', NULL, NULL, NULL, '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL),
+(3, 3, 3, 'FAT-2024-003', NULL, NULL, 1500.00, NULL, NULL, 1500.00, 'pendente', NULL, '2025-02-03', NULL, NULL, NULL, '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -209,6 +281,15 @@ CREATE TABLE `logs_sistema` (
   `deleted_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Despejando dados para a tabela `logs_sistema`
+--
+
+INSERT INTO `logs_sistema` (`id`, `usuario_id`, `acao`, `tabela`, `registro_id`, `dados`, `ip`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 'login', 'usuarios', 1, '{\"sucesso\": true}', '127.0.0.1', '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL),
+(2, 2, 'criar', 'processos', 1, '{\"processo_id\": 1}', '127.0.0.1', '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL),
+(3, 3, 'atualizar', 'documentos', 1, '{\"documento_id\": 1}', '127.0.0.1', '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -226,6 +307,52 @@ CREATE TABLE `mensagens` (
   `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `deleted_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Despejando dados para a tabela `mensagens`
+--
+
+INSERT INTO `mensagens` (`id`, `conversa_id`, `remetente_id`, `conteudo`, `lida`, `data_leitura`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 1, 'Prezado cliente, como posso ajudar?', 1, NULL, '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL),
+(2, 1, 4, 'Gostaria de saber o andamento do processo', 0, NULL, '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL),
+(3, 2, 2, 'Favor enviar os documentos solicitados', 1, NULL, '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura para tabela `noticias`
+--
+
+CREATE TABLE `noticias` (
+  `id` int(11) NOT NULL,
+  `slug` varchar(255) NOT NULL,
+  `categoria` enum('Política','Esporte','Cidade','Oeste') NOT NULL,
+  `titulo` varchar(255) NOT NULL,
+  `image` varchar(200) NOT NULL,
+  `content` text NOT NULL,
+  `galeria` varchar(200) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  `deleted_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Despejando dados para a tabela `noticias`
+--
+
+INSERT INTO `noticias` (`id`, `slug`, `categoria`, `titulo`, `image`, `content`, `galeria`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 'novasmedidassoaprovadasnacmaramunicipaledt', 'Política', 'Novas medidas são aprovadas na câmara municipal-edt', 'politica1.jpg', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.', 'galeria1.jpg', '2024-12-22 00:09:28', '2025-01-06 05:12:35', '2025-01-06 00:18:20'),
+(2, 'esporte-regional-2024', 'Esporte', 'Time local se classifica para final do campeonato', 'esporte1.jpg', 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.', 'galeria2.jpg', '2024-12-22 00:09:28', '2024-12-22 00:09:28', NULL),
+(3, 'cidade-obras-2024', 'Cidade', 'Prefeitura inicia obras de revitalização do centro', 'cidade1.jpg', 'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.', 'galeria3.jpg', '2024-12-22 00:09:28', '2024-12-22 00:09:28', NULL),
+(4, 'oeste-desenvolvimento-2024', 'Oeste', 'Região Oeste recebe investimentos em infraestrutura', 'oeste1.jpg', 'Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.', 'galeria4.jpg', '2024-12-22 00:09:28', '2024-12-22 00:09:28', '0000-00-00 00:00:00'),
+(5, 'politica-estadual-2024', 'Política', 'Assembleia aprova novo projeto de lei', 'politica2.jpg', 'At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident.', 'galeria5.jpg', '2024-12-22 00:09:28', '2024-12-22 00:09:28', '0000-00-00 00:00:00'),
+(6, 'esporte-copa-2024', 'Esporte', 'Atletas locais se destacam em competição nacional', 'esporte2.jpg', 'Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio.', 'galeria6.jpg', '2024-12-22 00:09:28', '2024-12-22 00:09:28', NULL),
+(7, 'cidade-cultura-2024', 'Cidade', 'Festival cultural movimenta a cidade', 'cidade2.jpg', 'Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus.', 'galeria7.jpg', '2024-12-22 00:09:28', '2024-12-22 00:09:28', NULL),
+(8, 'oeste-economia-2024', 'Oeste', 'Setor industrial da região oeste apresenta crescimento', 'oeste2.jpg', 'Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae.', 'galeria8.jpg', '2024-12-22 00:09:28', '2024-12-22 00:09:28', NULL),
+(9, 'politica-nacional-2024', 'Política', 'Mudanças na legislação afetam município', 'politica3.jpg', 'Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat.', 'galeria9.jpg', '2024-12-22 00:09:28', '2024-12-22 00:09:28', NULL),
+(10, 'esporte-juventude-2024', 'Esporte', 'Projeto esportivo beneficia jovens da cidade', 'esporte3.jpg', 'Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?', 'galeria10.jpg', '2024-12-22 00:09:28', '2024-12-22 00:09:28', NULL),
+(11, '', 'Política', 'INTENÇÃO DE REGISTRO DE PREÇOS Nº 04/2023 – PROCESSO Nº 8.358/2023', '/assets/img/upload/Captura de tela 2024-04-09 203004.png', 'kijiknmln knoojn jnomlmlmm knolmlm oomolml', '/assets/img/upload/Captura de tela 2024-04-09 203004.png', '0000-00-00 00:00:00', '0000-00-00 00:00:00', NULL),
+(16, 'inten----o-de-registro-de-pre--os-n---04-2023-----processo-n---8-358-2023', 'Política', 'INTENÇÃO DE REGISTRO DE PREÇOS Nº 04/2023 – PROCESSO Nº 8.358/2023', '/assets/img/upload/Captura de tela 2024-04-09 203004.png', 'lorem ipsum', '', '2025-01-06 04:15:00', '2025-01-06 04:15:00', NULL);
 
 -- --------------------------------------------------------
 
@@ -245,6 +372,15 @@ CREATE TABLE `notificacoes` (
   `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `deleted_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Despejando dados para a tabela `notificacoes`
+--
+
+INSERT INTO `notificacoes` (`id`, `usuario_id`, `titulo`, `mensagem`, `tipo`, `lida`, `data_leitura`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 'Novo processo', 'Um novo processo foi cadastrado', 'sistema', 0, NULL, '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL),
+(2, 2, 'Prazo', 'Prazo processual pr├│ximo do vencimento', 'alerta', 0, NULL, '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL),
+(3, 3, 'Documento', 'Novo documento anexado ao processo', 'informacao', 1, NULL, '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL);
 
 -- --------------------------------------------------------
 
@@ -273,6 +409,15 @@ CREATE TABLE `processos` (
   `deleted_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Despejando dados para a tabela `processos`
+--
+
+INSERT INTO `processos` (`id`, `cliente_id`, `area_atuacao_id`, `numero_processo`, `titulo`, `descricao`, `valor_causa`, `honorarios`, `statos`, `prioridade`, `data_distribuicao`, `data_conclusao`, `comarca`, `vara`, `juiz`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 1, '0001234-12.2024.8.26', 'A├º├úo de Indeniza├º├úo', 'Processo de indeniza├º├úo por danos morais', 50000.00, 5000.00, 'pendente', 'media', NULL, NULL, NULL, NULL, NULL, '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL),
+(2, 2, 2, '0002345-23.2024.8.26', 'Reclama├º├úo Trabalhista', 'Processo trabalhista - horas extras', 30000.00, 3000.00, 'em_analise', 'alta', NULL, NULL, NULL, NULL, NULL, '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL),
+(3, 3, 3, '0003456-34.2024.8.26', 'Div├│rcio Consensual', 'Processo de div├│rcio', 10000.00, 2000.00, 'pendente', 'baixa', NULL, NULL, NULL, NULL, NULL, '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -295,6 +440,15 @@ CREATE TABLE `processo_documentos` (
   `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `deleted_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Despejando dados para a tabela `processo_documentos`
+--
+
+INSERT INTO `processo_documentos` (`id`, `processo_id`, `documento_id`, `tipo_documento`, `data_upload`, `status`, `observacoes`, `versao`, `hash_arquivo`, `tamanho_arquivo`, `usuario_upload_id`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 1, 'peti├º├úo', '2024-12-20 22:32:12', 'ativo', NULL, 1, NULL, NULL, 1, '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL),
+(2, 1, 2, 'procura├º├úo', '2024-12-20 22:32:12', 'ativo', NULL, 1, NULL, NULL, 1, '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL),
+(3, 2, 3, 'documento', '2024-12-20 22:32:12', 'ativo', NULL, 1, NULL, NULL, 2, '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL);
 
 -- --------------------------------------------------------
 
@@ -431,6 +585,18 @@ CREATE TABLE `usuarios` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
+-- Despejando dados para a tabela `usuarios`
+--
+
+INSERT INTO `usuarios` (`id`, `nome`, `email`, `senha`, `tipo`, `status`, `ultimo_acesso`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 'Admin Sistema', 'admin@advocacia.com', '55a5e9e78207b4df8699d60886fa070079463547b095d1a05bc719bb4e6cd251', 'admin', 'ativo', NULL, '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL),
+(2, 'Jo├úo Advogado', 'joao@advocacia.com', '55a5e9e78207b4df8699d60886fa070079463547b095d1a05bc719bb4e6cd251', 'advogado', 'ativo', NULL, '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL),
+(3, 'Maria Advogada', 'maria@advocacia.com', '55a5e9e78207b4df8699d60886fa070079463547b095d1a05bc719bb4e6cd251', 'advogado', 'ativo', NULL, '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL),
+(4, 'Pedro Cliente', 'pedro@email.com', '55a5e9e78207b4df8699d60886fa070079463547b095d1a05bc719bb4e6cd251', 'cliente', 'ativo', NULL, '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL),
+(5, 'Ana Cliente', 'ana@email.com', '55a5e9e78207b4df8699d60886fa070079463547b095d1a05bc719bb4e6cd251', 'cliente', 'ativo', NULL, '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL),
+(6, 'Carlos Cliente', 'carlos@email.com', '55a5e9e78207b4df8699d60886fa070079463547b095d1a05bc719bb4e6cd251', 'cliente', 'ativo', NULL, '2024-12-20 22:32:12', '2024-12-20 22:32:12', NULL);
+
+--
 -- Índices para tabelas despejadas
 --
 
@@ -511,6 +677,13 @@ ALTER TABLE `mensagens`
   ADD KEY `idx_remetente_id` (`remetente_id`);
 
 --
+-- Índices de tabela `noticias`
+--
+ALTER TABLE `noticias`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `slug` (`slug`);
+
+--
 -- Índices de tabela `notificacoes`
 --
 ALTER TABLE `notificacoes`
@@ -588,79 +761,85 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de tabela `agenda`
 --
 ALTER TABLE `agenda`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de tabela `andamentos_processo`
 --
 ALTER TABLE `andamentos_processo`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de tabela `areas_atuacao`
 --
 ALTER TABLE `areas_atuacao`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de tabela `auditoria`
 --
 ALTER TABLE `auditoria`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de tabela `clientes`
 --
 ALTER TABLE `clientes`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de tabela `conversas`
 --
 ALTER TABLE `conversas`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de tabela `documentos`
 --
 ALTER TABLE `documentos`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de tabela `faturas`
 --
 ALTER TABLE `faturas`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de tabela `logs_sistema`
 --
 ALTER TABLE `logs_sistema`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de tabela `mensagens`
 --
 ALTER TABLE `mensagens`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT de tabela `noticias`
+--
+ALTER TABLE `noticias`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT de tabela `notificacoes`
 --
 ALTER TABLE `notificacoes`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de tabela `processos`
 --
 ALTER TABLE `processos`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de tabela `processo_documentos`
 --
 ALTER TABLE `processo_documentos`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de tabela `processo_profissionais`
@@ -696,7 +875,7 @@ ALTER TABLE `tipos_permissao`
 -- AUTO_INCREMENT de tabela `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- Restrições para tabelas despejadas

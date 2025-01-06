@@ -1,24 +1,34 @@
 <?php
 include_once('../core/helpers/redirects.php');
+require_once('../core/config/session.php');
 include_once('../core/helpers/views_helpers.php');
 
 class ControllerAdmin 
 {
-    private $redirects;
-    private $session;
+    protected $session;
+    protected $redirects;
     protected $viewHelper;
 
     public function __construct() {
+        $this->session = new Session();
         $this->redirects = new Redirects();
-        $this->session = new Session();        
+        $this->viewHelper = new ViewsHelpers();
     }
 
-    public function loadPage($page, $params = array()) {
-        // Extrai as variáveis do array para ficarem disponíveis na view
+    /**
+     * Carrega uma página do painel administrativo
+     * @param string $page Nome da página a ser carregada
+     * @param array $params Parâmetros para a página
+     */
+    protected function loadPage($page, $params = []) {
         if (!empty($params)) {
             extract($params);
         }
         
+        // Disponibiliza as variáveis para as views
+        $session = $this->session;
+        $redirects = $this->redirects;
+      
         include_once('pages/include/header.php');
         include_once("pages/{$page}.php");
         include_once('pages/include/footer.php');
@@ -39,99 +49,58 @@ class ControllerAdmin
         }
     }
 
-   /**
- * Retorna os dados do POST sanitizados no formato array associativo
- * @param array $allowedTags Array de tags HTML permitidas por campo
- * @return array|null
- */
-public function getPost($allowedTags = []) {
-    // Verifica se houve POST se não houver, retorna null
-    if (empty($_POST)) {
-        return null;
-    }
-
-    $post = [];
-    foreach ($_POST as $key => $value) {
-        // Pula campos do sistema
-        if (in_array($key, ['csrf_token', 'action'])) {
-            continue;
+    /**
+     * Retorna os dados do POST sanitizados no formato array associativo
+     * @param array $allowedTags Array de tags HTML permitidas por campo
+     * @return array|false
+     */
+    public function getPost($allowedTags = []) {
+        // Verifica se houve POST se não houver, retorna null
+        if (empty($_POST)) {
+            return false;
         }
 
-        // Mantém arrays intactos para o DataTables
-        if (in_array($key, ['columns', 'order', 'search'])) {
-            $post[$key] = $value;
-            continue;
+        $post = [];
+        foreach ($_POST as $key => $value) {
+            if (is_array($value)) {
+                $post[$key] = $value;
+            } else {
+                // Se houver tags permitidas para este campo, usa strip_tags com essas tags
+                if (isset($allowedTags[$key])) {
+                    $post[$key] = strip_tags($value, $allowedTags[$key]);
+                } else {
+                    // Se não houver tags permitidas, remove todas as tags
+                    $post[$key] = strip_tags($value);
+                }
+            }
+        }
+        return $post;
+    }
+
+    /**
+     * Retorna os dados do GET sanitizados no formato array associativo
+     * @return array|null
+     */
+    public function getGET() {
+        // Verifica se houve GET se não houver, retorna null
+        if (empty($_GET)) {
+            return null;
         }
 
-        // Sanitização básica para outros campos
-        if (is_array($value)) {
-            $post[$key] = array_map(function($item) use ($allowedTags, $key) {
-                return $this->sanitizeValue($item, $allowedTags[$key] ?? []);
-            }, $value);
-        } else {
-            $post[$key] = $this->sanitizeValue($value, $allowedTags[$key] ?? []);
+        $get = [];
+        foreach ($_GET as $key => $value) {
+            if (is_array($value)) {
+                $get[$key] = $value;
+            } else {
+                $get[$key] = strip_tags($value);
+            }
         }
-    }
-    
-    return $post;
-}
-
-/**
- * Retorna os dados do GET sanitizados no formato array associativo
- * @return array|null
- */
-
-public function getGET() {
-    // Verifica se houve GET se não houver, retorna null
-    if (empty($_GET)) {
-        return null;
-    }
-    $get = [];
-    foreach ($_GET as $key => $value) {
-        // Pula campos do sistema
-        if (in_array($key, ['csrf_token', 'action'])) {
-            continue;
-        }
-
-        $get[$key] = $this->sanitizeValue($value);
-    }
-    return $get;
-}
-
-/**
- * Sanitiza um valor individual
- * @param mixed $value Valor a ser sanitizado
- * @param array $allowedTags Tags HTML permitidas para este campo
- * @return mixed
- */
-protected function sanitizeValue($value, array $allowedTags = []) {
-    if (is_null($value)) {
-        return null;
+        return $get;
     }
 
-    // Converte para string se não for
-    $value = (string) $value;
-
-    // Remove caracteres invisíveis e espaços extras
-    $value = trim(preg_replace('/\s+/', ' ', $value));
-    
-    // Remove caracteres null bytes
-    $value = str_replace(chr(0), '', $value);
-
-    // Sanitiza HTML se houver tags permitidas
-    if (!empty($allowedTags)) {
-        $value = strip_tags($value, $allowedTags);
-    } else {
-        $value = strip_tags($value);
+    protected function slug($titulo) {
+        $slug = strtolower(trim($titulo));
+        $slug = preg_replace('/[^0-9a-z]/', '', $slug);
+        return $slug;
     }
-
-    // Converte caracteres especiais em entidades HTML
-    $value = htmlspecialchars($value, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-
-    // Remove scripts maliciosos
-    $value = preg_replace('/(javascript|vbscript|expression|applet|meta|xml|blink|link|style|script|embed|object|iframe|frame|frameset|ilayer|layer|bgsound|title|base|onabort|onactivate|onafterprint|onafterupdate|onbeforeactivate|onbeforecopy|onbeforecut|onbeforedeactivate|onbeforeeditfocus|onbeforepaste|onbeforeprint|onbeforeunload|onbeforeupdate|onblur|onbounce|oncellchange|onchange|onclick|oncontextmenu|oncontrolselect|oncopy|oncut|ondataavailable|ondatasetchanged|ondatasetcomplete|ondblclick|ondeactivate|ondrag|ondragend|ondragenter|ondragleave|ondragover|ondragstart|ondrop|onerror|onerrorupdate|onfilterchange|onfinish|onfocus|onfocusin|onfocusout|onhelp|onkeydown|onkeypress|onkeyup|onlayoutcomplete|onload|onlosecapture|onmousedown|onmouseenter|onmouseleave|onmousemove|onmouseout|onmouseover|onmouseup|onmousewheel|onmove|onmoveend|onmovestart|onpaste|onpropertychange|onreadystatechange|onreset|onresize|onresizeend|onresizestart|onrowenter|onrowexit|onrowsdelete|onrowsinserted|onscroll|onselect|onselectionchange|onselectstart|onstart|onstop|onsubmit|onunload)/i', '', $value);
-    
-    return $value;
-}
-
 }

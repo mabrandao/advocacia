@@ -44,6 +44,11 @@
 
   <!-- Template Main JS File -->
   <script src="<?= base_url() ?>assets/js/main.js"></script>
+  
+  <!-- ChatGPT Integration -->
+  <script src="<?= base_url() ?>assets/js/chatgpt-integration.js"></script>
+
+  <?php require_once(dirname(__FILE__) . '/../../../assets/notificacao.php'); ?>
 
 </body>       
 

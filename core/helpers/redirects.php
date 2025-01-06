@@ -11,21 +11,47 @@ class Redirects {
     }
 
     /**
-    * Redireciona o usuário para a página anterior
+    * Redireciona o usuário para a página anterior de forma segura
     * @return void
     */
     public function back() {
-        header("Location: " . $_SERVER['HTTP_REFERER']);
-        exit;
+        // Limpa qualquer saída anterior
+        if (ob_get_length()) ob_clean();
+        
+        // Verifica se existe uma página anterior válida
+        $referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : BASE_URL;
+        
+        // Garante que o redirecionamento seja para o mesmo domínio
+        if (!str_starts_with($referer, BASE_URL)) {
+            $referer = BASE_URL;
+        }
+        
+        // Define headers de segurança
+        header_remove('X-Powered-By');
+        header('Cache-Control: no-cache, no-store, must-revalidate');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+        
+        header("Location: " . $referer);
+        exit();
     }
 
     /**
-    * Redireciona o usuário para a home
+    * Redireciona o usuário para a home de forma segura
     * @return void
     */
     public function home() {
+        // Limpa qualquer saída anterior
+        if (ob_get_length()) ob_clean();
+        
+        // Define headers de segurança
+        header_remove('X-Powered-By');
+        header('Cache-Control: no-cache, no-store, must-revalidate');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+        
         header("Location: " . BASE_URL);
-        exit;
+        exit();
     }
 
     /**
@@ -37,43 +63,51 @@ class Redirects {
     }
 
     /**
-    * Redireciona o usuário para uma URL específica 
-    * @param string $url - URL de destino já com a base URL
-    * @return void
-    */
+     * Redireciona o usuário para uma URL específica de forma segura
+     * @param string $url - URL de destino
+     * @return void
+     */
     public function redirect($url) {
-        $this->home().$url;
-        exit;
+        // Limpa qualquer saída anterior
+        if (ob_get_length()) ob_clean();
+        
+        // Garante que a URL comece com BASE_URL
+        if (!str_starts_with($url, BASE_URL)) {
+            $url = rtrim(BASE_URL, '/') . '/' . ltrim($url, '/');
+        }
+        
+        // Define headers de segurança
+        header_remove('X-Powered-By');
+        header('Cache-Control: no-cache, no-store, must-revalidate');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+        
+        header("Location: " . $url);
+        exit();
     }
 
     /**
-    * Redireciona o usuário para uma URL específica com uma mensagem de feedback
-    *
-    * @param int|string $metodo    - Método de redirecionamento: 1 (redireciona), 'back' ou 'home'
-    * @param string|null $tipo     - Tipo da mensagem: 'success', 'error', 'warning', 'info' ou null
-    * @param string $message       - Mensagem a ser exibida
-    * @param string $url          - URL de destino (usado apenas quando $metodo = 1)
-    * @return void
-    */
+     * Redireciona o usuário para uma URL específica com uma mensagem de feedback
+     *
+     * @param int|string $metodo    - Método de redirecionamento: 1 (redireciona), 'back' ou 'home'
+     * @param string $message       - Mensagem a ser exibida
+     * @param string $url          - URL de destino (usado apenas quando $metodo = 1)
+     * @param string|null $tipo     - Tipo da mensagem: 'success', 'error', 'warning', 'info' ou null
+     * @return void
+     */
     public function redirectMessage($metodo, $message, $url, $tipo = null): void {   
-        switch ($tipo) {
-            case 'success':
-                $this->session ->setFlash('success', $message);  
-                break;
-            case 'error':
-                $this->session->setFlash('error', $message);
-                break;
-            case 'warning':
-                $this->session->setFlash('warning', $message);
-                break;
-            case 'info':
-                $this->session->setFlash('info', $message);
-                break;
-            default:
-                $this->session->setFlash('default', $message);
-                break;
+        if (empty($message)) {
+            throw new \InvalidArgumentException('A mensagem não pode estar vazia');
         }
+        
+        // Define o tipo padrão se não for especificado
+        $tipos_validos = ['success', 'error', 'warning', 'info'];
+        $tipo = in_array($tipo, $tipos_validos) ? $tipo : 'default';
+        
+        // Define a mensagem na sessão
+        $this->session->setFlash($tipo, $message);
 
+        // Executa o redirecionamento apropriado
         switch ($metodo) {
             case 'back':
                 $this->back();
@@ -81,9 +115,14 @@ class Redirects {
             case 'home':
                 $this->home();
                 break;
-            default:
+            case 1:
+                if (empty($url)) {
+                    throw new \InvalidArgumentException('URL não pode estar vazia quando método é 1');
+                }
                 $this->redirect($url);
                 break;
+            default:
+                throw new \InvalidArgumentException('Método de redirecionamento inválido');
         }
     }
 

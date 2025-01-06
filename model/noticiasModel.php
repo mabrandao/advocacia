@@ -45,8 +45,7 @@ class NoticiasModel extends Model {
             'categoria' => ['required'],
             'titulo' => ['required', 'max:255'],
             'image' => ['required', 'max:255'],
-            'content' => ['required'],
-            'galeria' => ['required']
+            'content' => ['required']
         ];
     }
 

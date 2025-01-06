@@ -156,7 +156,8 @@ abstract class Model {
 
         // Sanitiza os dados
         $data = $this->sanitizeData($data);
-        
+        $data['created_at'] = date('Y-m-d H:i:s');
+        $data['updated_at'] = date('Y-m-d H:i:s');
         try {
             $conn = Database::getInstance();
             
@@ -173,7 +174,7 @@ abstract class Model {
             return $stmt->execute($values);
         } catch(PDOException $e) {
             error_log("Erro na inserção: " . $e->getMessage());
-            $this->session->setFlash('error', 'Erro ao inserir registro: ' . $e->getMessage());
+            $this->erro =  $e->getMessage();
             return false;
         }
         
@@ -244,7 +245,7 @@ abstract class Model {
      * @param array $data Dados a serem atualizados
      * @return bool True em caso de sucesso, False em caso de erro
      */
-    public function update($data) {
+    public function update($id, $data) {
 
         // Valida os dados antes de atualizar
         if (!$this->validate($data)) {
@@ -253,35 +254,34 @@ abstract class Model {
 
         // Sanitiza os dados
         $data = $this->sanitizeData($data);
+        $data['updated_at'] = date('Y-m-d H:i:s');
         
         // Prepara os campos para o UPDATE
         $sets = [];
         $valores = [];
-        $id = $data['id'];
+    
         unset($data['id']);
         foreach ($data as $campo => $valor) {
             $sets[] = "{$campo} = ?";
             $valores[] = $valor;
-        }        
+        }
+        
+        // Adiciona o ID ao final do array de valores
+        $valores[] = $id;
 
-        // Limpa os campos
-        $valores = array_map(function($value) {
-            return $value === null ? 'null' : $value;
-        }, $valores);
-
-        $sql = "UPDATE {$this->table} SET " . implode(', ', $sets) . " 
-                WHERE id = :id LIMIT 1";
-                
         try {
             $conn = Database::getInstance();
+            
+            $sql = "UPDATE {$this->table} SET " . implode(', ', $sets) . " WHERE id = ? LIMIT 1";
+            
             $stmt = $conn->prepare($sql);
-            $stmt->bindParam(':id', $id);
             $result = $stmt->execute($valores);
+            
             Database::close();
             return $result;
         } catch(PDOException $e) {
             error_log("Erro na atualização: " . $e->getMessage());
-            $this->session->setFlash('error', 'Erro na atualização: ' . $e->getMessage());
+            $this->erro =  $e->getMessage();
             Database::close();
             return false;
         }
@@ -294,7 +294,10 @@ abstract class Model {
      * @param string $tabela Nome da tabela
      * @return bool True em caso de sucesso, False em caso de erro
      */
-    public function delete($id) {
+    public function delete($id = null) {
+        if (!$id) {
+            return false;
+        }
         try {
             $conn = Database::getInstance();
             $sql = "UPDATE {$this->table} SET deleted_at = NOW() WHERE id = :id LIMIT 1";
@@ -330,7 +333,7 @@ abstract class Model {
         }
         
         if (in_array('excluir', $exibir)) {
-            $buttons .= '<a href="' . base_url() . $baseUrl . '-excluir/' . $id . '" ';
+            $buttons .= '<a href="' . base_url() . $baseUrl . '-delete/' . $id . '" ';
             $buttons .= 'class="btn btn-sm btn-danger" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Excluir" title="Excluir" ';
             $buttons .= 'onclick="return confirm(\'Tem certeza que deseja excluir este registro?\');">';
             $buttons .= '<i class="bi bi-trash"></i></a>';
@@ -438,7 +441,7 @@ abstract class Model {
             
             // Adiciona os botões de ação
             foreach ($data as &$row) {
-                $row['acoes'] = $this->generateActionButtons($row['id'], $this->table, $exibir);
+                $row['acoes'] = $this->generateActionButtons($row['id'],"admin/" . $this->table, $exibir);
                 if (isset($row['created_at'])) {
                     $row['created_at'] = date('d/m/Y - H:i', strtotime($row['created_at']));
                 }

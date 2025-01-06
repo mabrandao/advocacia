@@ -10,26 +10,27 @@ $url = explode('/', $url);
 
 $pagina = $url[0];
 
-$rotas = [
-    'dashboard' => ['DashboardController', 'index', 'Dashboard'],
-    'perfil' => ['PerfilController', 'index', 'Perfil'],
-    'clientes' => ['ClientesController', 'index', 'Clientes'],
-    'servicos' => ['ServicosController', 'index', 'Servicos'],
-    'configuracoes' => ['ConfiguracoesController', 'index', 'Configuracoes'],
-    'logout' => ['LogoutController', 'index'],
-    'processos' => ['ProcessosController', 'index', 'Processos'],
 
-    'noticias' => ['NoticiasController', 'index', 'Noticias'],
-    'noticias-listar' => ['NoticiasController', 'listar', ''],
-    'noticias-store' => ['NoticiasController', 'store', 'Cadastrar Noticia'],
-    'noticias-editar' => ['NoticiasController', 'edit', 'Editar Noticia'],
-    'noticias-delete' => ['NoticiasController', 'delete', ''],
+$rotas = [
+    'dashboard' => ['DashboardController', 'index'],
+    'perfil' => ['PerfilController', 'index'],
+    'clientes' => ['ClientesController', 'index'],
+    'servicos' => ['ServicosController', 'index'],
+    'configuracoes' => ['ConfiguracoesController', 'index'],
+    'logout' => ['LogoutController', 'index'],
+    'processos' => ['ProcessosController', 'index'],
+
+    'noticias' => ['NoticiasController', 'index'],
+    'noticias-listar' => ['NoticiasController', 'listar'],
+    'noticias-store' => ['NoticiasController', 'store'],
+    'noticias-editar' => ['NoticiasController', 'edit'],
+    'noticias-delete' => ['NoticiasController', 'delete'],
     
-    'sobre' => ['SobreController', 'index', 'Sobre'],
-    'areas-atuacao' => ['AreasAtuacaoController', 'index', 'Áreas de Atuação'],
-    'contato' => ['ContatoController', 'index', 'Contato'],
-    'arquivos' => ['DashboardController', 'arquivos', 'Gerenciamento de Arquivos'],
-    '404' => ['ErrorController', 'index', 'Página Não Encontrada']
+    'sobre' => ['SobreController', 'index'],
+    'areas-atuacao' => ['AreasAtuacaoController', 'index'],
+    'contato' => ['ContatoController', 'index'],
+    'arquivos' => ['DashboardController', 'arquivos'],
+    '404' => ['ErrorController', 'index']
 ];
 
 $rota = isset($rotas[$pagina]) ? $rotas[$pagina] : $rotas['404'];
@@ -45,7 +46,6 @@ if (!file_exists($arquivo)) {
 require_once $arquivo;
 $controller_class = $rota[0];
 $metodo = $rota[1];
-$titulo = $rota[2];
 
 $controller = new $controller_class();
-$controller->$metodo();
+$controller->$metodo(isset($url[1]) ? $url[1] : null);

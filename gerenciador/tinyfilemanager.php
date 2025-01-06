@@ -5064,13 +5064,7 @@ function fm_show_header_login()
             });
             
         </script>
-        <script>
-        function retornar_caminho(url) {
-            if (window.parent.imageCallback) {
-                window.parent.imageCallback(url);
-            }
-        }
-        </script>
+        <script src="retornar_caminho.js"></script>
 
         <?php if (isset($_GET['edit']) && isset($_GET['env']) && FM_EDIT_FILE && !FM_READONLY):
             $ext = pathinfo($_GET["edit"], PATHINFO_EXTENSION);

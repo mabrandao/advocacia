@@ -1,11 +1,11 @@
 <main id="main" class="main">
 
     <div class="pagetitle">
-      <h1><?= isset($title) ? $title : "" ?> Noticias</h1>
+      <h1><?= isset($titulo) ? $titulo : "" ?> Noticias</h1>
       <nav>
         <ol class="breadcrumb">
           <li class="breadcrumb-item"><a href="<?=base_url()?>">Home</a></li>
-          <li class="breadcrumb-item active"><?= isset($title) ? $title : "" ?> Noticias</li>
+          <li class="breadcrumb-item active"><?= isset($titulo) ? $titulo : "" ?> Noticias</li>
         </ol>
       </nav>
     </div><!-- End Page Title -->

@@ -129,7 +129,96 @@ class ViewsHelpers
             return 'Parâmetros action e fields são obrigatórios';
         }
 
-        $form = '<form action="'.base_url().$param['action'].'" method="POST" enctype="multipart/form-data">';
+        $hasFileManager = false;
+        $form = '';
+
+        // Verifica se tem campos que usam o gerenciador de arquivos
+        foreach ($param['fields'] as $field) {
+            if (isset($field['type']) && $field['type'] === 'input-group') {
+                $hasFileManager = true;
+                break;
+            }
+        }
+
+        // Adiciona os scripts do gerenciador de arquivos se necessário
+        if ($hasFileManager) {
+            $form .= '
+            <script src="'.base_url().'gerenciador/retornar_caminho.js"></script>
+            <script>var fileManagerUrl = "'.base_url().'gerenciador/tinyfilemanager.php?tokenrr=dfbs8fgd61vdfvdv542@ff52364";</script>
+            <script src="'.base_url().'assets/js/filemanager-input.js"></script>
+            
+            <!-- Modal do Gerenciador de Arquivos -->
+            <div class="modal" id="fileManagerModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="fileManagerModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-fullscreen">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="fileManagerModalLabel">Gerenciador de Arquivos</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                        </div>
+                        <div class="modal-body p-0">
+                            <iframe id="fileManagerIframe" src="" style="width: 100%; height: calc(100vh - 130px); border: none;" tabindex="-1"></iframe>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <style>
+                .modal-backdrop { z-index: 1055 !important; }
+                #fileManagerModal { z-index: 1056 !important; }
+                .image-preview { 
+                    max-width: 200px;
+                    margin-top: 10px;
+                    display: none;
+                }
+                .image-preview img {
+                    width: 100%;
+                    height: auto;
+                    border-radius: 4px;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                }
+            </style>';
+        }
+
+        $hasTextarea = false;
+        foreach ($param['fields'] as $field) {
+            if (isset($field['type']) && $field['type'] === 'textarea') {
+                $hasTextarea = true;
+                break;
+            }
+        }
+
+        if ($hasTextarea) {
+            $form .= '
+            <!-- TinyMCE e plugins -->
+            <script src="'.base_url().'assets/vendor/tinymce/tinymce.min.js"></script>
+            <script src="'.base_url().'assets/js/tinymce-chatgpt.js"></script>
+            <script>var fileManagerUrl = "'.base_url().'gerenciador/tinyfilemanager.php?tokenrr=dfbs8fgd61vdfvdv542@ff52364";</script>
+            <script src="'.base_url().'assets/js/tinymce-filemanager.js"></script>
+            <script src="'.base_url().'assets/js/tinymce-init.js"></script>
+
+            <!-- Modal do Gerenciador de Arquivos -->
+            <div class="modal" id="fileManagerModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="fileManagerModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-fullscreen">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="fileManagerModalLabel">Gerenciador de Arquivos</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                        </div>
+                        <div class="modal-body p-0">
+                            <iframe id="fileManagerIframe" src="" style="width: 100%; height: calc(100vh - 130px); border: none;" tabindex="-1"></iframe>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>';
+        }
+
+        $form .= '<form action="'.base_url().$param['action'].'" method="POST" enctype="multipart/form-data">';
         
         if (isset($param['hidden'])) {
             foreach ($param['hidden'] as $name => $value) {
@@ -146,7 +235,7 @@ class ViewsHelpers
 
             $class = isset($field['class']) ? $field['class'] : '';
             $value = isset($field['value']) ? $field['value'] : '';
-            $required = isset($field['required']) && $field['required'] ? 'required' : '';
+            $required = isset($field['required']) && $field['required'] ? 'required="true"' : '';
             $placeholder = isset($field['placeholder']) ? 'placeholder="'.$field['placeholder'].'"' : '';
             $col = isset($field['col']) ? $field['col'] : 'col-md-6';
 
@@ -156,8 +245,9 @@ class ViewsHelpers
 
             switch ($field['type']) {
                 case 'textarea':
-                    $form .= '<textarea class="form-control '.$class.'" id="'.$field['name'].'" 
-                        name="'.$field['name'].'" '.$required.' '.$placeholder.'>'.$value.'</textarea>';
+                    $form .= '<textarea class="form-control '.$class.'" 
+                        id="'.$field['name'].'" name="'.$field['name'].'" 
+                        '.$required.' '.$placeholder.' rows="5">'.$value.'</textarea>';
                     break;
 
                 case 'select':
@@ -186,14 +276,20 @@ class ViewsHelpers
                     }
                     break;
                 case 'input-group':
+                    $inputId = isset($field['id']) ? $field['id'] : $field['name'];
                     $form .= '<div class="input-group">
                                 <div class="input-group-prepend">
-                                    <button class="btn btn-secondary" type="button" id="btn-file">Selecione</button>
+                                    <button class="btn btn-secondary btn-file-manager" type="button" data-target="'.$inputId.'">
+                                        <i class="bi bi-folder2-open"></i> Selecione
+                                    </button>
                                 </div>
-                               <input type="'.$field['type'].'" class="form-control '.$class.'" 
-                        id="'.$field['name'].'" name="'.$field['name'].'" value="'.$value.'" 
-                        '.$required.' '.$placeholder.' aria-describedby="btn-file">
-                                </div>';
+                                <input type="text" class="form-control '.$class.' input-file-preview" 
+                                    id="'.$inputId.'" name="'.$field['name'].'" value="'.$value.'" 
+                                    '.$required.' '.$placeholder.'>
+                            </div>
+                            <div class="image-preview">
+                                <img id="'.$inputId.'_preview" src="" alt="Prévia da imagem">
+                            </div>';
                     break;
 
                 default:
@@ -206,21 +302,45 @@ class ViewsHelpers
         }
         $form .= '</div>';
 
-        // Extrai o nome base da URL removendo sufixos
-        $back = preg_replace('/-(?:editar|cadastrar|store|edit)$/', '', $param['action']);
+        // Extrai o nome base da URL removendo sufixos e IDs
+        $back = preg_replace('/-(?:editar|cadastrar|store|edit)(?:\/\d+)?$/', '', $param['action']);
+        
+        // Extrai o sufixo usando expressão regular, ignorando o ID se presente
+        if (preg_match('/-?(editar|cadastrar|store|edit)(?:\/\d+)?$/', $param['action'], $matches)) {
+            $sufix = $matches[1];
+        } else {
+            $sufix = '';
+        }
+
+
+        switch($sufix) {
+            case 'editar':
+                $buttonText = 'Atualizar';
+                break;
+            case 'edit':
+                $buttonText = 'Atualizar';
+                break;
+            case 'cadastrar':
+                $buttonText = 'Salvar';
+                break;
+            case 'store':
+                $buttonText = 'Salvar';
+                break;
+            default:
+                $buttonText = 'Salvar';
+        }
 
         // Botões do formulário
         $form .= '<div class="row mt-3">';
         $form .= '<div class="col-12">';
-        if (isset($param['buttons'])) {
+        
+        if (isset($param['buttons']) && is_array($param['buttons'])) {
             foreach ($param['buttons'] as $button) {
-                $type = isset($button['type']) ? $button['type'] : 'submit';
-                $class = isset($button['class']) ? $button['class'] : 'btn-primary';
-                $text = isset($button['text']) ? $button['text'] : 'Enviar';
+                extract($button);
                 $form .= '<button type="'.$type.'" class="btn '.$class.' me-2">'.$text.'</button>';
             }
         } else {
-            $form .= '<button type="submit" class="btn btn-primary me-2">Salvar</button>';
+            $form .= '<button type="submit" class="btn btn-primary me-2">'.$buttonText.'</button>';
             $form .= '<a href="'.base_url().$back.'" class="btn btn-secondary">Voltar</a>';
         }
         $form .= '</div></div>';

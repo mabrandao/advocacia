@@ -288,7 +288,7 @@ class ViewsHelpers
                                     '.$required.' '.$placeholder.'>
                             </div>
                             <div class="image-preview">
-                                <img id="'.$inputId.'_preview" src="" alt="Prévia da imagem">
+                                <img id="'.$inputId.'_preview" src="<?=$base_url()?>" alt="Prévia da imagem">
                             </div>';
                     break;
 
